@@ -3,7 +3,7 @@ var app = angular.module('app', ['ngRoute']);
 app.controller('AppController', function($http, $routeParams, $scope) {
 
     this.topics = [];
-    this.issues = [];
+    this.issuesData = [];
 
     this.loadingTopics = false;
 
@@ -23,7 +23,8 @@ app.controller('AppController', function($http, $routeParams, $scope) {
         'nono-akeneo',
         'skeleton',
         'rybus',
-        'CharlyP'
+        'CharlyP',
+        'damien-carcel'
     ];
 
     var self = this;
@@ -45,12 +46,15 @@ app.controller('AppController', function($http, $routeParams, $scope) {
 
     this.loadIssues = function() {
         $http.get('/issues').then(function(res) {
-            self.issues = res.data;
-            console.log(self.issues);
+            self.issuesData = res.data;
+            console.log(self.issuesData);
         });
     };
 
     this.isWhitelisted = function(issue) {
+        if(!issue){
+            return false;
+        }
         return gitAuthorWhitelist.indexOf(issue.user.login) !== -1;
     };
 });

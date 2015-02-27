@@ -2,45 +2,88 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 var https = require('https');
 var fs = require('fs');
+var async = require('async');
+var util = require('util');
+var parameters = JSON.parse(fs.readFileSync('./parameters.json', 'utf8'));
 
 var cache = {};
 
-exports.downloadIssues = function(cb) {
-    var url = 'https://api.github.com/repos/akeneo/pim-community-dev/issues';
-
-    if (cache[url]) {
-        console.log('serving request', url, 'from cache');
-        if (cb) {
-            cb(cache[url]);
+function downloadJSON(url, callback) {
+    https.get(
+        {
+            hostname: 'api.github.com',
+            'path': url,
+            headers: {
+                "user-agent": "forum-app",
+                "Authorization": "token " + parameters.gh_token
+            }
+        },
+        function(res) {
+            var data = "";
+            res.on('data', function (chunk) {
+                data += chunk;
+            });
+            res.on("end", function() {
+                callback(JSON.parse(data));
+            });
         }
-        return;
+    ).on("error", function() {
+        console.log('request error');
+        callback(null);
+    });
+}
+
+var downloadRepositories = function(cb) {
+    console.log('Loading repositories...');
+    downloadJSON('/orgs/akeneo/repos', function(repos) {
+        if (util.isArray(repos)) {
+            cb(repos);
+        } else {
+            console.log(repos);
+            cb([]);
+        }
+    });
+};
+
+exports.downloadIssues = function(cb) {
+    if (fs.existsSync('/tmp/issues.json')) {
+        console.log('Loading issues from cache file');
+        var cachedIssues = fs.readFileSync('/tmp/issues.json', 'utf-8');
+        issues = JSON.parse(cachedIssues).issues;
+        console.log(issues);
+        return cb(issues);
     }
 
-    var callback = function(response) {
-      var str = '';
+    var issues = [];
 
-      response.on('data', function (chunk) {
-        str += chunk;
-      });
+    downloadRepositories(function(repos) {
+        console.log('starting issue download from ' + repos.length + ' repositories');
 
-      response.on('end', function () {
-        console.log('request completed');
-        var result = JSON.parse(str);
-        cache[url] = result;
-        if (cb) {
-            cb(result);
-        }
-      });
-    };
+        async.eachSeries(repos, function(repo, callback) {
+            console.log('Downloading issues from', repo.full_name);
+            downloadJSON('/repos/akeneo/' + repo.name + '/issues', function(data) {
+                issues.push({
+                    repo: repo,
+                    issues: data
+                });
+                callback();
+            });
+        }, function() {
+            console.log('done, got a total of', issues.length, 'issues');
+            console.log(issues);
+            if (repos.length) {
+                fs.writeFile("/tmp/issues.json", JSON.stringify({ "issues": issues }), function(err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log("issues saved to file!");
+                    }
+                });
+            }
 
-    console.log('starting request to', url);
-    https.request({
-        hostname: 'api.github.com',
-        'path': '/repos/akeneo/pim-community-dev/issues',
-        headers: {
-             "user-agent": "forumCrawler"
-        }
-    }, callback).end();
+            cb(issues);
+        });
+    });
 };
 
 setInterval(
