@@ -1,7 +1,16 @@
 .truncate {
-  width: 480px;
+  width: 430px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
+}
+
+.log-window {
+    position: absolute;
+    top: 10px;
+}
+
+.git {
+    left: 460px;
 }

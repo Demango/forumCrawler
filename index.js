@@ -4,6 +4,7 @@ var hbs = require('hbs');
 var bodyParser = require('body-parser');
 
 var forumApi = require('./forumApi');
+var gitApi = require('./gitApi');
 
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
@@ -23,6 +24,12 @@ app.get('/topics', function(req, res) {
 app.get('/topics/clear-cache', function(req, res) {
     forumApi.clearCache();
     res.send('Done');
+});
+
+app.get('/issues', function(req, res) {
+    gitApi.downloadIssues(function(issues) {
+        res.json(issues);
+    });
 });
 
 app.listen(3000);

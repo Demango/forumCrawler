@@ -3,8 +3,28 @@ var app = angular.module('app', ['ngRoute']);
 app.controller('AppController', function($http, $routeParams, $scope) {
 
     this.topics = [];
+    this.issues = [];
 
     this.loadingTopics = false;
+
+    var gitAuthorWhitelist = [
+        'sumbobyboys',
+        'grena',
+        'jmleroux',
+        'Nuscly',
+        'jjanvier',
+        'solivier',
+        'nidup',
+        'willy-ahva',
+        'fitn',
+        'filipsalpe',
+        'BitOne',
+        'antoineguigan',
+        'nono-akeneo',
+        'skeleton',
+        'rybus',
+        'CharlyP'
+    ];
 
     var self = this;
 
@@ -22,11 +42,16 @@ app.controller('AppController', function($http, $routeParams, $scope) {
             self.topics = [];
         });
     };
-});
 
-app.filter('pretty', function() {
-    return function(input) {
-        return input.replace('http://www.akeneo.com/forums/topic/', '').replace(/-/g, ' ').replace('/', '');
+    this.loadIssues = function() {
+        $http.get('/issues').then(function(res) {
+            self.issues = res.data;
+            console.log(self.issues);
+        });
+    };
+
+    this.isWhitelisted = function(issue) {
+        return gitAuthorWhitelist.indexOf(issue.user.login) !== -1;
     };
 });
 
