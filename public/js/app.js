@@ -7,6 +7,8 @@ app.controller('AppController', function($http, $routeParams, $scope) {
 
     this.loadingTopics = false;
 
+    var activeTab = null;
+
     var gitAuthorWhitelist = [
         'sumbobyboys',
         'grena',
@@ -24,10 +26,18 @@ app.controller('AppController', function($http, $routeParams, $scope) {
         'skeleton',
         'rybus',
         'CharlyP',
-        'damien-carcel'
+        'damien-carcel',
+        'gquemener'
     ];
 
     var self = this;
+
+    this.toggleActive = function(tab) {
+        if (self.activeTab === tab){
+            self.activeTab = null;
+        }
+        else{ self.activeTab = tab;}
+    };
 
     this.loadTopics = function() {
         self.loadingTopics = true;
@@ -46,12 +56,23 @@ app.controller('AppController', function($http, $routeParams, $scope) {
 
     this.loadIssues = function() {
         $http.get('/issues').then(function(res) {
-            self.issuesData = res.data;
+            var issuesData = _.map(res.data, function(repoData) {
+                return {
+                    repo: repoData.repo,
+                    issues: _.filter(repoData.issues, function(issue) {
+                        return !isWhitelisted(issue);
+                    })
+                };
+            });
+
+            self.issuesData = _.filter(issuesData, function(item) {
+                return item.issues.length > 0;
+            });
             console.log(self.issuesData);
         });
     };
 
-    this.isWhitelisted = function(issue) {
+    var isWhitelisted = function(issue) {
         if(!issue){
             return false;
         }

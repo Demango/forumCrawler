@@ -1,3 +1,4 @@
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-6 col-sm-6">
@@ -19,18 +20,24 @@
                 </div>
             </section>
         </div>
+
         <div class="col-md-6 col-sm-6">
             <section ng-init="app.loadIssues()">
-                <div class="panel panel-default log-window git" style="width: 450px" ng-repeat="repoData in app.issuesData">
-                    <div class="panel-body">
-                        <div ng-repeat="issue in repoData.issues">
-                            <div ng-if="!app.isWhitelisted(issue)">
-                                <a href="{{ issue.html_url }}" target="_blank" class="truncate">{{ issue.title }}</a>
-                                <p>{{ issue.updated_at|date: 'medium'  }}</p>
-                                <p>{{ issue.user.login }}</p>
-                                <div style="height: 2px; background-color: #ddd; height: 2px"></div>
+                <div class="list-group">
+                    <div class="panel panel-default log-window git" style="width: 450px" ng-repeat="repoData in app.issuesData">
+                        <a ng-click="app.toggleActive(repoData.repo.name)" class="list-group-item">{{ repoData.repo.name }}
+                            <span class="badge">{{ repoData.issues.length }}</span>
+                        </a>
+                        <section ng-show="repoData.repo.name == app.activeTab">
+                            <div class="panel-body">
+                                <div ng-repeat="issue in repoData.issues">
+                                    <a href="{{ issue.html_url }}" target="_blank" class="truncate">{{ issue.title }}</a>
+                                    <p>{{ issue.updated_at|date: 'medium'  }}</p>
+                                    <p>{{ issue.user.login }}</p>
+                                    <div style="height: 2px; background-color: #ddd; height: 2px"></div>
+                                </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
                 </div>
             </section>

@@ -4,19 +4,27 @@ var https = require('https');
 var fs = require('fs');
 var async = require('async');
 var util = require('util');
-var parameters = JSON.parse(fs.readFileSync('./parameters.json', 'utf8'));
+
+var ghToken = null;
+if (fs.existsSync('./parameters.json')) {
+    var parameters = JSON.parse(fs.readFileSync('./parameters.json', 'utf8'));
+    ghToken = parameters.gh_token || null;
+}
 
 var cache = {};
 
 function downloadJSON(url, callback) {
+    var headers = {
+        "user-agent": "forum-app",
+    };
+    if (ghToken) {
+        headers.Authorization = "token " + ghToken;
+    }
     https.get(
         {
             hostname: 'api.github.com',
             'path': url,
-            headers: {
-                "user-agent": "forum-app",
-                "Authorization": "token " + parameters.gh_token
-            }
+            headers: headers
         },
         function(res) {
             var data = "";
