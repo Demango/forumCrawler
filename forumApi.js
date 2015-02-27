@@ -34,7 +34,10 @@ var authorWhitelist = [
   'Nuscly',
   'Damien Carcel',
   'Frédéric de Gombert',
-  'Filips Alpe'
+  'Filips Alpe',
+  'Adrien Pétremann',
+  'Charles',
+  'Emilie Gieler'
 ];
 
 function parseAge(age) {
