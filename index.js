@@ -20,4 +20,9 @@ app.get('/topics', function(req, res) {
     });
 });
 
+app.get('/topics/clear-cache', function(req, res) {
+    forumApi.clearCache();
+    res.send('Done');
+});
+
 app.listen(3000);

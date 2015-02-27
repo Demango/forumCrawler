@@ -1,9 +1,14 @@
 <section ng-init="app.loadTopics()">
     <div class="panel panel-default" style="width: 500px">
+        <button ng-click="app.clearCache()">Clear cache</button>
         <div class="panel-body">
             <div ng-repeat="topic in app.topics|orderBy:'age':true">
-                <a href="{{ topic.url }}" class="truncate">{{ topic.url|pretty }}</a>
+                <a href="{{ topic.url }}" class="truncate">{{ topic.title }}</a>
                 <p>{{ topic.age|date: 'medium' }}</p>
+            </div>
+            <div ng-show="app.loadingTopics == true">
+                Now loading topics
+                <img src="/img/ajax-loader.gif" alt="Loading">
             </div>
         </div>
     </div>

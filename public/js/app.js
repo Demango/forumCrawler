@@ -4,16 +4,23 @@ app.controller('AppController', function($http, $routeParams, $scope) {
 
     this.topics = [];
 
+    this.loadingTopics = false;
+
     var self = this;
 
     this.loadTopics = function() {
+        self.loadingTopics = true;
         $http.get('/topics').then(function(res) {
             self.topics = res.data;
+            self.loadingTopics = false;
         });
     };
 
-    this.resetPlayers = function() {
-        self.topics = [];
+    this.clearCache = function() {
+        $http.get('/topics/clear-cache').then(function(res) {
+            self.loadTopics();
+            self.topics = [];
+        });
     };
 });
 

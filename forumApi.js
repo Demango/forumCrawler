@@ -19,7 +19,6 @@ function download(url, callback) {
   });
 }
 
-var topics = [];
 var topicCache = [];
 var authorWhitelist = [
   'Nicolas Dupont',
@@ -38,12 +37,6 @@ var authorWhitelist = [
   'Filips Alpe'
 ];
 
-if (fs.existsSync('/tmp/topics.json')) {
-  console.log('Loading topics from cache file');
-  var cachedTopics = fs.readFileSync('/tmp/topics.json', 'utf-8');
-  topicCache = JSON.parse(cachedTopics).topics;
-}
-
 function parseAge(age) {
   age = age.replace(/ /g, "");
   age = age.split(",");
@@ -51,8 +44,6 @@ function parseAge(age) {
 
   age.forEach(function(block)
   {
-    console.log(age);
-    console.log(block);
     var newAge = block.match(/\d+/)[0];
     newAge = parseInt(newAge);
 
@@ -71,7 +62,7 @@ function parseAge(age) {
         newAge = newAge * 43829.1;
     }
     if (ageStr == 'years' || ageStr == 'year') {
-        newAge = newAge * 525949;
+        newAge = newAge * 525949.2;
     }
     parsedAge += newAge;
   });
@@ -101,9 +92,15 @@ function downloadForums(cb) {
 }
 
 function downloadTopics(cb) {
-  if (topicCache.length) {
-    return cb(topicCache);
+  if (fs.existsSync('/tmp/topics.json')) {
+    console.log('Loading topics from cache file');
+    var cachedTopics = fs.readFileSync('/tmp/topics.json', 'utf-8');
+    topics = JSON.parse(cachedTopics).topics;
+    return cb(topics);
   }
+
+  var topics = [];
+
   downloadForums(function(forums) {
     console.log('starting download from forums:', forums);
 
@@ -114,6 +111,8 @@ function downloadTopics(cb) {
           $("ul.topic:not(.super-sticky) a.bbp-topic-permalink").each(function(i, e) {
             var resolved = $(e).siblings('span.resolved').length;
             console.log('resolved:', resolved);
+            var title = $(e).attr("title");
+            console.log('title:', title);
             var author = $(e).parent().siblings('.bbp-topic-freshness').find('.bbp-topic-freshness-author .bbp-author-name').text();
             console.log('author:', author);
             var age = $(e).parent().siblings('.bbp-topic-freshness').find('a').text().replace(/ago.*$/i, "");
@@ -123,6 +122,7 @@ function downloadTopics(cb) {
               topics.push(
                 {
                   url: $(e).attr("href"),
+                  title: title,
                   author: author,
                   age: age
                 }
@@ -133,7 +133,6 @@ function downloadTopics(cb) {
         callback();
       });
     }, function() {
-      topicCache = topics;
       console.log('done, topics are:', topics, 'a total of', topics.length, 'topics');
       fs.writeFile("/tmp/topics.json", JSON.stringify({ "topics": topics }), function(err) {
           if(err) {
@@ -148,4 +147,12 @@ function downloadTopics(cb) {
   });
 }
 
+function clearCache() {
+  if (fs.existsSync("/tmp/topics.json")) {
+    fs.unlink("/tmp/topics.json");
+    console.log('Cache cleared');
+  }
+}
+
 exports.getTopics = downloadTopics;
+exports.clearCache = clearCache;
