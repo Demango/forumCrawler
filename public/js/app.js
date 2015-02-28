@@ -6,6 +6,7 @@ app.controller('AppController', function($http, $routeParams, $scope) {
     this.issuesData = [];
 
     this.loadingTopics = false;
+    this.loadingIssues = false;
 
     var activeTab = null;
 
@@ -54,7 +55,15 @@ app.controller('AppController', function($http, $routeParams, $scope) {
         });
     };
 
+    this.clearIssuesCache = function() {
+        $http.get('/issues/clear-cache').then(function(res) {
+            self.loadIssues();
+            self.issuesData = [];
+        });
+    };
+
     this.loadIssues = function() {
+        self.loadingIssues = true;
         $http.get('/issues').then(function(res) {
             var issuesData = _.map(res.data, function(repoData) {
                 return {
@@ -68,7 +77,7 @@ app.controller('AppController', function($http, $routeParams, $scope) {
             self.issuesData = _.filter(issuesData, function(item) {
                 return item.issues.length > 0;
             });
-            console.log(self.issuesData);
+            self.loadingIssues = false;
         });
     };
 

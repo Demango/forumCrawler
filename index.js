@@ -32,4 +32,9 @@ app.get('/issues', function(req, res) {
     });
 });
 
+app.get('/issues/clear-cache', function(req, res) {
+    forumApi.clearIssuesCache();
+    res.send('Done');
+});
+
 app.listen(3000);

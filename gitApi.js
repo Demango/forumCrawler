@@ -47,7 +47,6 @@ var downloadRepositories = function(cb) {
         if (util.isArray(repos)) {
             cb(repos);
         } else {
-            console.log(repos);
             cb([]);
         }
     });
@@ -58,7 +57,6 @@ exports.downloadIssues = function(cb) {
         console.log('Loading issues from cache file');
         var cachedIssues = fs.readFileSync('/tmp/issues.json', 'utf-8');
         issues = JSON.parse(cachedIssues).issues;
-        console.log(issues);
         return cb(issues);
     }
 
@@ -77,8 +75,7 @@ exports.downloadIssues = function(cb) {
                 callback();
             });
         }, function() {
-            console.log('done, got a total of', issues.length, 'issues');
-            console.log(issues);
+            console.log('done, got a total of', issues.length, 'repositories');
             if (repos.length) {
                 fs.writeFile("/tmp/issues.json", JSON.stringify({ "issues": issues }), function(err) {
                     if (err) {
