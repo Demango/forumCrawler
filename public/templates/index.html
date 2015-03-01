@@ -1,16 +1,17 @@
-
 <div class="container-fluid">
+
     <div class="row">
         <div class="col-md-6 col-sm-6">
             <section ng-init="app.loadTopics()">
                 <div class="panel panel-default log-window forum" style="width: 450px">
-                    <button ng-click="app.clearCache()">Clear cache</button>
+                    <button ng-click="app.clearCache()" class="btn btn-default">Clear cache</button>
+                    <div class="line"></div>
                     <div class="panel-body">
                         <div ng-repeat="topic in app.topics|orderBy:'age':true">
                             <a href="{{ topic.url }}" target="_blank" class="truncate">{{ topic.title }}</a>
                             <p>{{ topic.age|date: 'medium' }}</p>
                             <p>{{ topic.author }}</p>
-                            <div style="height: 2px; background-color: #ddd; height: 2px"></div>
+                            <div class="line"></div>
                         </div>
                         <div ng-show="app.loadingTopics == true">
                             Now loading topics
@@ -25,7 +26,7 @@
             <section ng-init="app.loadIssues()">
                 <div class="list-group">
                     <div class="panel panel-default log-window forum" style="width: 450px">
-                        <button ng-click="app.clearIssuesCache()">Clear cache</button>
+                        <button ng-click="app.clearIssuesCache()" class="btn btn-default">Clear cache</button>
                         <div class="panel panel-default log-window git" style="width: 450px" ng-repeat="repoData in app.issuesData">
                             <a ng-click="app.toggleActive(repoData.repo.name)" class="list-group-item">{{ repoData.repo.name }}
                                 <span class="badge">{{ repoData.issues.length }}</span>
@@ -36,7 +37,7 @@
                                         <a href="{{ issue.html_url }}" target="_blank" class="truncate">{{ issue.title }}</a>
                                         <p>{{ issue.updated_at|date: 'medium'  }}</p>
                                         <p>{{ issue.user.login }}</p>
-                                        <div style="height: 2px; background-color: #ddd; height: 2px"></div>
+                                        <div class="line"></div>
                                     </div>
                                 </div>
                             </section>
@@ -52,4 +53,5 @@
             </section>
         </div>
     </div>
+
 </div>

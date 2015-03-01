@@ -13,3 +13,9 @@
 .git {
     left: 460px;
 }
+
+.line {
+    height: 2px;
+    background-color: #ddd;
+    height: 2px
+}

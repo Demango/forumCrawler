@@ -37,7 +37,7 @@ app.controller('AppController', function($http, $routeParams, $scope) {
         if (self.activeTab === tab){
             self.activeTab = null;
         }
-        else{ self.activeTab = tab;}
+        else{self.activeTab = tab;}
     };
 
     this.loadTopics = function() {
