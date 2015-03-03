@@ -1,15 +1,45 @@
 var app = angular.module('app', ['ngRoute']);
 
-app.controller('AppController', function($http, $routeParams, $scope) {
-
+app.controller('ForumController', function($http, $routeParams, $scope) {
     this.topics = [];
-    this.issuesData = [];
 
     this.loadingTopics = false;
+
+    this.activeTab = null;
+
+    var self = this;
+
+    this.toggleActive = function(tab) {
+        if (self.activeTab === tab){
+            self.activeTab = null;
+        }
+        else{self.activeTab = tab;}
+    };
+
+    this.loadTopics = function() {
+        self.loadingTopics = true;
+        $http.get('/topics').then(function(res) {
+            self.topics = res.data;
+            self.loadingTopics = false;
+        });
+    };
+
+    this.clearCache = function() {
+        $http.get('/topics/clear-cache').then(function(res) {
+            self.loadTopics();
+            self.topics = [];
+        });
+    };
+
+});
+
+app.controller('IssueController', function($http, $routeParams, $scope) {
+
+    this.issuesData = [];
+
     this.loadingIssues = false;
 
-    var activeTab = null;
-    var activeTTab = null;
+    this.activeTab = null;
 
     var gitAuthorWhitelist = [
         'sumbobyboys',
@@ -41,29 +71,8 @@ app.controller('AppController', function($http, $routeParams, $scope) {
         else{self.activeTab = tab;}
     };
 
-    this.toggleTActive = function(tab) {
-        if (self.activeTTab === tab){
-            self.activeTTab = null;
-        }
-        else{self.activeTTab = tab;}
-    };
-
-    this.loadTopics = function() {
-        self.loadingTopics = true;
-        $http.get('/topics').then(function(res) {
-            self.topics = res.data;
-            self.loadingTopics = false;
-        });
-    };
 
     this.clearCache = function() {
-        $http.get('/topics/clear-cache').then(function(res) {
-            self.loadTopics();
-            self.topics = [];
-        });
-    };
-
-    this.clearIssuesCache = function() {
         $http.get('/issues/clear-cache').then(function(res) {
             self.loadIssues();
             self.issuesData = [];
@@ -96,6 +105,9 @@ app.controller('AppController', function($http, $routeParams, $scope) {
         return gitAuthorWhitelist.indexOf(issue.user.login) !== -1;
     };
 });
+
+app.controller('AppController', function($http, $routeParams, $scope) {
+    });
 
 app.config(function($routeProvider) {
     $routeProvider.
