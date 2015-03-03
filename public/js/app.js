@@ -9,6 +9,7 @@ app.controller('AppController', function($http, $routeParams, $scope) {
     this.loadingIssues = false;
 
     var activeTab = null;
+    var activeTTab = null;
 
     var gitAuthorWhitelist = [
         'sumbobyboys',
@@ -38,6 +39,13 @@ app.controller('AppController', function($http, $routeParams, $scope) {
             self.activeTab = null;
         }
         else{self.activeTab = tab;}
+    };
+
+    this.toggleTActive = function(tab) {
+        if (self.activeTTab === tab){
+            self.activeTTab = null;
+        }
+        else{self.activeTTab = tab;}
     };
 
     this.loadTopics = function() {

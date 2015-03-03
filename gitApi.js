@@ -75,7 +75,6 @@ exports.downloadIssues = function(cb) {
                 callback();
             });
         }, function() {
-            console.log('done, got a total of', issues.length, 'repositories');
             if (repos.length) {
                 fs.writeFile("/tmp/issues.json", JSON.stringify({ "issues": issues }), function(err) {
                     if (err) {

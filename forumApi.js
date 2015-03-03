@@ -83,10 +83,12 @@ function downloadForums(cb) {
     if (data) {
       var $ = cheerio.load(data);
       $("a.bbp-forum-title").each(function(i, e) {
-        forums.push($(e).attr("href"));
-        for (var j = 1; j <= 5; j++) {
-          forums.push($(e).attr("href") + 'page/' + j + '/');
-        }
+        forums.push(
+          {
+             'url': $(e).attr("href"),
+             'name':  $(e).text()
+          }
+        );
       });
     }
 
@@ -107,7 +109,40 @@ function downloadTopics(cb) {
   downloadForums(function(forums) {
     console.log('starting download from forums:', forums);
 
-    async.forEach(forums, function(url, callback) {
+    async.forEach(forums, function(forum, callback) {
+      downloadForumTopics(forum.url, function(forumTopics) {
+        topics.push(
+          {
+            'forum': forum,
+            'topics': forumTopics
+          }
+        );
+        callback();
+      });
+    }, function() {
+      fs.writeFile("/tmp/topics.json", JSON.stringify({ "topics": topics }), function(err) {
+          if(err) {
+              console.log(err);
+          } else {
+              console.log("Topics saved to file!");
+          }
+      });
+
+      cb(topics);
+    });
+  });
+}
+
+function downloadForumTopics(url, cb) {
+  var urls = [];
+  urls.push(url);
+
+  for (var j = 1; j <= 5; j++) {
+    urls.push(url + 'page/' + j + '/');
+  }
+  var forumTopics = [];
+
+  async.eachSeries(urls, function(url, callback) {
       download(url, function(data) {
         if (data) {
           var $ = cheerio.load(data);
@@ -122,7 +157,8 @@ function downloadTopics(cb) {
             age = parseAge(age);
             console.log('age:', age);
             if (!resolved && authorWhitelist.indexOf(author) === -1) {
-              topics.push(
+              console.log(url);
+              forumTopics.push(
                 {
                   url: $(e).attr("href"),
                   title: title,
@@ -135,18 +171,8 @@ function downloadTopics(cb) {
         }
         callback();
       });
-    }, function() {
-      console.log('done, topics are:', topics, 'a total of', topics.length, 'topics');
-      fs.writeFile("/tmp/topics.json", JSON.stringify({ "topics": topics }), function(err) {
-          if(err) {
-              console.log(err);
-          } else {
-              console.log("Topics saved to file!");
-          }
-      });
-
-      cb(topics);
-    });
+  }, function() {
+      cb(forumTopics);
   });
 }
 
