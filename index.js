@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var forumApi = require('./forumApi');
 var gitApi = require('./gitApi');
+var testApi = require('./testApi');
 
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
@@ -35,6 +36,18 @@ app.get('/issues', function(req, res) {
 app.get('/issues/clear-cache', function(req, res) {
     forumApi.clearIssuesCache();
     res.send('Done');
+});
+
+app.get('/tests', function(req, res) {
+    testApi.downloadTests(function(tests) {
+        res.json(tests);
+    });
+});
+
+app.get('/tests/:name', function(req, res) {
+    testApi.getTestInfo(req.params.name, function(testInfo) {
+        res.json(testInfo);
+    });
 });
 
 app.listen(3000);

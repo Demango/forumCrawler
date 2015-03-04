@@ -41,27 +41,6 @@ app.controller('IssueController', function($http, $routeParams, $scope) {
 
     this.activeTab = null;
 
-    var gitAuthorWhitelist = [
-        'sumbobyboys',
-        'grena',
-        'jmleroux',
-        'Nuscly',
-        'jjanvier',
-        'solivier',
-        'nidup',
-        'willy-ahva',
-        'fitn',
-        'filipsalpe',
-        'BitOne',
-        'antoineguigan',
-        'nono-akeneo',
-        'skeleton',
-        'rybus',
-        'CharlyP',
-        'damien-carcel',
-        'gquemener'
-    ];
-
     var self = this;
 
     this.toggleActive = function(tab) {
@@ -85,9 +64,7 @@ app.controller('IssueController', function($http, $routeParams, $scope) {
             var issuesData = _.map(res.data, function(repoData) {
                 return {
                     repo: repoData.repo,
-                    issues: _.filter(repoData.issues, function(issue) {
-                        return !isWhitelisted(issue);
-                    })
+                    issues: repoData.issues
                 };
             });
 
@@ -97,13 +74,63 @@ app.controller('IssueController', function($http, $routeParams, $scope) {
             self.loadingIssues = false;
         });
     };
+});
 
-    var isWhitelisted = function(issue) {
-        if(!issue){
-            return false;
+app.controller('TestController', function($http, $routeParams, $scope) {
+    this.tests = [];
+
+    this.activeTab = null;
+
+    this.loadingTests = false;
+
+    this.showGreen = false;
+
+    var self = this;
+
+    this.isVisible = function(test) {
+        if (/^red/.test(test.color)) {
+            return true;
         }
-        return gitAuthorWhitelist.indexOf(issue.user.login) !== -1;
+        return this.showGreen;
     };
+
+    this.showButton = function(test) {
+        if (/^red/.test(test.color)) {
+            return true;
+        }else { return false; }
+    };
+
+    this.toggleActive = function(tab) {
+        if (self.activeTab === tab){
+            self.activeTab = null;
+        }
+        else{self.activeTab = tab;}
+    };
+
+    this.loadTests = function() {
+        self.loadingTests = true;
+        $http.get('/tests').then(function(res) {
+            self.tests = res.data;
+            self.loadingTests = false;
+        });
+    };
+
+    this.getInfo = function(test) {
+        $http.get('/tests/' + test.name).then(function(res) {
+            test.info = res.data;
+        });
+    };
+
+    this.redCount = function(tests) {
+    var count = 0;
+    tests.forEach(function(test){
+        if(/^red/.test(test.color)){
+            count++;
+        }
+    });
+    return count;
+};
+
 });
 
 app.controller('AppController', function($http, $routeParams, $scope) {
@@ -113,6 +140,16 @@ app.config(function($routeProvider) {
     $routeProvider.
         when('/', {
             templateUrl: 'templates/index.html',
+            controller: 'AppController',
+            controllerAs: 'app'
+        }).
+        when('/community', {
+            templateUrl: 'templates/community.html',
+            controller: 'AppController',
+            controllerAs: 'app'
+        }).
+         when('/tests', {
+            templateUrl: 'templates/tests.html',
             controller: 'AppController',
             controllerAs: 'app'
         }).

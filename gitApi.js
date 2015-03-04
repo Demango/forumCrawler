@@ -4,6 +4,7 @@ var https = require('https');
 var fs = require('fs');
 var async = require('async');
 var util = require('util');
+var _ = require('underscore');
 
 var ghToken = null;
 if (fs.existsSync('./parameters.json')) {
@@ -12,6 +13,34 @@ if (fs.existsSync('./parameters.json')) {
 }
 
 var cache = {};
+
+var gitAuthorWhitelist = [
+        'sumbobyboys',
+        'grena',
+        'jmleroux',
+        'Nuscly',
+        'jjanvier',
+        'solivier',
+        'nidup',
+        'willy-ahva',
+        'fitn',
+        'filipsalpe',
+        'BitOne',
+        'antoineguigan',
+        'nono-akeneo',
+        'skeleton',
+        'rybus',
+        'CharlyP',
+        'damien-carcel',
+        'gquemener'
+    ];
+
+var isWhitelisted = function(issue) {
+        if(!issue){
+            return false;
+        }
+        return gitAuthorWhitelist.indexOf(issue.user.login) !== -1;
+    };
 
 function downloadJSON(url, callback) {
     var headers = {
@@ -68,6 +97,9 @@ exports.downloadIssues = function(cb) {
         async.eachSeries(repos, function(repo, callback) {
             console.log('Downloading issues from', repo.full_name);
             downloadJSON('/repos/akeneo/' + repo.name + '/issues', function(data) {
+                data = _.filter(data, function(issue) {
+                        return !isWhitelisted(issue);
+                    });
                 issues.push({
                     repo: repo,
                     issues: data

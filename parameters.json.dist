@@ -1,3 +1,5 @@
 {
     "gh_token": "your github token here"
+    "jenkins_url": "your jenkins url here",
+    "jenkins_auth": "your jenkins auth here"
 }
