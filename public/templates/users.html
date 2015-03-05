@@ -1,0 +1,49 @@
+<div class="container-fluid" ng-controller="UserController as userCtrl">
+
+    <div class="btn-group" role="group">
+        <a href="/#/" class="btn btn-default">Home</a>
+        <a href="/#/community" class="btn btn-default">Community</a>
+        <a href="/#/tests" class="btn btn-default">Tests</a>
+        <a href="/#/users" class="btn btn-default active">Users</a>
+    </div>
+
+    <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-primary" ng-class="{ active: userCtrl.showForm }">
+            <input type="checkbox" autocomplete="off" ng-model="userCtrl.showForm"> New user
+        </label>
+    </div>
+    <div ng-show="userCtrl.showForm">
+        <form ng-submit="userCtrl.sendForm()">
+            Name:<br>
+            <input type="text" name="name" ng-model="userCtrl.user.name">
+            <br>
+            Git:<br>
+            <input type="text" name="git" ng-model="userCtrl.user.git">
+            <br>
+            Forum:<br>
+            <input type="text" name="forum" ng-model="userCtrl.user.forum">
+            <br><br>
+            <input class="btn btn-default" type="submit" value="Submit">
+        </form>
+    </div>
+    <section ng-init="userCtrl.loadUsers()">
+        <table class="table table-hover">
+            <thead>
+                <th>Name</th>
+                <th>Git</th>
+                <th>Forum</th>
+                <th>Delete</th>
+            </thead>
+            <tbody>
+                <tr ng-repeat="user in userCtrl.users">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.git }}</td>
+                    <td>{{ user.forum }}</td>
+                    <td>
+                        <a ng-click="userCtrl.deleteUser(user)" class="btn btn-default">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</div>

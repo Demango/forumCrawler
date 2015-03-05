@@ -1,3 +1,5 @@
+'use strict';
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 var https = require('https');
@@ -12,35 +14,16 @@ if (fs.existsSync('./parameters.json')) {
     ghToken = parameters.gh_token || null;
 }
 
-var cache = {};
-
-var gitAuthorWhitelist = [
-        'sumbobyboys',
-        'grena',
-        'jmleroux',
-        'Nuscly',
-        'jjanvier',
-        'solivier',
-        'nidup',
-        'willy-ahva',
-        'fitn',
-        'filipsalpe',
-        'BitOne',
-        'antoineguigan',
-        'nono-akeneo',
-        'skeleton',
-        'rybus',
-        'CharlyP',
-        'damien-carcel',
-        'gquemener'
-    ];
+if (fs.existsSync('./users.json')) {
+    var users = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
+}
 
 var isWhitelisted = function(issue) {
-        if(!issue){
-            return false;
-        }
-        return gitAuthorWhitelist.indexOf(issue.user.login) !== -1;
-    };
+    if(!issue){
+        return false;
+    }
+    return _.where(users, {git: issue.user.login})[0] !== undefined;
+};
 
 function downloadJSON(url, callback) {
     var headers = {
@@ -121,10 +104,3 @@ exports.downloadIssues = function(cb) {
         });
     });
 };
-
-setInterval(
-  function() {
-    cache = {};
-  },
-  600000
-);

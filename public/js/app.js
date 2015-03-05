@@ -1,3 +1,5 @@
+'use strict';
+
 var app = angular.module('app', ['ngRoute']);
 
 app.controller('ForumController', function($http, $routeParams, $scope) {
@@ -88,14 +90,14 @@ app.controller('TestController', function($http, $routeParams, $scope) {
     var self = this;
 
     this.isVisible = function(test) {
-        if (/^red/.test(test.color)) {
+        if (/^(yellow|red)/.test(test.color)) {
             return true;
         }
         return this.showGreen;
     };
 
     this.showButton = function(test) {
-        if (/^red/.test(test.color)) {
+        if (/^(yellow|red)/.test(test.color)) {
             return true;
         }else { return false; }
     };
@@ -124,12 +126,46 @@ app.controller('TestController', function($http, $routeParams, $scope) {
     this.redCount = function(tests) {
     var count = 0;
     tests.forEach(function(test){
-        if(/^red/.test(test.color)){
+        if(/^(yellow|red)/.test(test.color)){
             count++;
         }
     });
     return count;
-};
+    };
+
+    this.clearCache = function() {
+        $http.get('/tests/clear-cache').then(function(res) {
+            self.loadTests();
+            self.tests = [];
+        });
+    };
+
+});
+
+app.controller('UserController', function($http, $routeParams, $scope) {
+
+    this.users = [];
+    this.user = {};
+    this.showForm = false;
+
+    var self = this;
+
+    this.loadUsers = function() {
+        $http.get('/users').then(function(res) {
+            self.users = res.data;
+        });
+    };
+
+    this.sendForm = function() {
+        $http.post('/users', this.user);
+        self.user = {};
+        self.loadUsers();
+    };
+
+    this.deleteUser = function(user) {
+        $http.post('/users/delete', { username: user.name });
+        self.loadUsers();
+    };
 
 });
 
@@ -148,8 +184,13 @@ app.config(function($routeProvider) {
             controller: 'AppController',
             controllerAs: 'app'
         }).
-         when('/tests', {
+        when('/tests', {
             templateUrl: 'templates/tests.html',
+            controller: 'AppController',
+            controllerAs: 'app'
+        }).
+        when('/users', {
+            templateUrl: 'templates/users.html',
             controller: 'AppController',
             controllerAs: 'app'
         }).

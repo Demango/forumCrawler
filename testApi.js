@@ -1,6 +1,7 @@
+'use strict';
+
 var http = require("http");
 var async = require('async');
-var util = require('util');
 var fs = require('fs');
 
 var jenkinsUrl;
@@ -24,6 +25,7 @@ function download(url, callback) {
                 data += chunk;
             });
             res.on("end", function() {
+                console.log(url);
                 callback(JSON.parse(data));
             });
         }
@@ -46,7 +48,20 @@ var downloadViews = function(cb) {
     });
 };
 
+exports.clearCache = function() {
+  if (fs.existsSync("/tmp/tests.json")) {
+    fs.unlink("/tmp/tests.json");
+    console.log('Cache cleared');
+  }
+};
+
 exports.downloadTests = function(cb) {
+    if (fs.existsSync('/tmp/tests.json')) {
+        console.log('Loading tests from cache file');
+        var cachedTests = fs.readFileSync('/tmp/tests.json', 'utf-8');
+        tests = JSON.parse(cachedTests).tests;
+        return cb(tests);
+    }
 
     var tests = [];
 
@@ -71,6 +86,16 @@ exports.downloadTests = function(cb) {
                 callback();
             }
         }, function() {
+            if (views.length) {
+                fs.writeFile("/tmp/tests.json", JSON.stringify({ "tests": tests }), function(err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log("tests saved to file!");
+                    }
+                });
+            }
+
             cb(tests);
         });
     });

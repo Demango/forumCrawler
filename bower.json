@@ -1,0 +1,21 @@
+{
+  "name": "forum",
+  "main": "index.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/demango/forumCrawler",
+  "authors": [
+    "Edgars Polis <edgras.polis@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.8.2"
+  }
+}

@@ -3,6 +3,8 @@
     <div class="btn-group" role="group">
         <a href="/#/" class="btn btn-default">Home</a>
         <a href="/#/community" class="btn btn-default">Community</a>
+        <a href="/#/tests" class="btn btn-default active">Tests</a>
+        <a href="/#/users" class="btn btn-default">Users</a>
     </div>
 
     <div class="btn-group" data-toggle="buttons">
@@ -16,6 +18,7 @@
             <section ng-init="testCtrl.loadTests()">
                 <div class="list-group">
                     <div class="log-window" style="width: 450px">
+                        <button ng-click="testCtrl.clearCache()" class="btn btn-default">Clear cache</button>
                         <div class="panel panel-default log-window" style="width: 450px" ng-repeat="testData in testCtrl.tests">
                             <a ng-click="testCtrl.toggleActive(testData.view)" class="list-group-item">{{ testData.view.name }}
                                 <span class="label label-default pull-right" ng-class="{ 'label-danger': testCtrl.redCount(testData.tests)}">{{ testCtrl.redCount(testData.tests) }}</span>
@@ -31,8 +34,8 @@
                                                 <p>{{ test.info.healthReport[1].description }}</p>
                                                 <p ng-show="test.info.healthReport.length">
                                                     Last
-                                                    {{ test.info.lastCompletedBuild.number - test.info.lastSuccessfulBuild.number}}
-                                                    builds failed.
+                                                    {{ test.info.lastCompletedBuild.number - test.info.lastStableBuild.number }}
+                                                    builds unstable.
                                                 </p>
                                             </div>
                                             <div class="line"></div>

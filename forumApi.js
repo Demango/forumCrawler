@@ -1,9 +1,16 @@
+'use strict';
+
 var http = require("http");
 var cheerio = require("cheerio");
 var async = require('async');
 var fs = require('fs');
+var _ = require('underscore');
 
 var forumUrl = "http://www.akeneo.com/forums/";
+
+if (fs.existsSync('./users.json')) {
+    var users = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
+}
 
 function download(url, callback) {
   http.get(url, function(res) {
@@ -20,25 +27,6 @@ function download(url, callback) {
 }
 
 var topicCache = [];
-var authorWhitelist = [
-  'Nicolas Dupont',
-  'Benoit Jacquemont',
-  'Julien Janvier',
-  'Willy',
-  'sumbobyboys',
-  'Gildas Quéméner',
-  'olivier',
-  'Stephan',
-  'fitn',
-  'rybus',
-  'Nuscly',
-  'Damien Carcel',
-  'Frédéric de Gombert',
-  'Filips Alpe',
-  'Adrien Pétremann',
-  'Charles',
-  'Emilie Gieler'
-];
 
 function parseAge(age) {
   age = age.replace(/ /g, "");
@@ -156,8 +144,7 @@ function downloadForumTopics(url, cb) {
             var age = $(e).parent().siblings('.bbp-topic-freshness').find('a').text().replace(/ago.*$/i, "");
             age = parseAge(age);
             console.log('age:', age);
-            if (!resolved && authorWhitelist.indexOf(author) === -1) {
-              console.log(url);
+            if (!resolved && (_.where(users, {forum: author})[0] === undefined)) {
               forumTopics.push(
                 {
                   url: $(e).attr("href"),
