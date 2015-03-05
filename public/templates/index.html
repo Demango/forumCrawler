@@ -1,8 +1,21 @@
 <div class="container-fluid">
-    <div class="btn-group" role="group">
-        <a href="/#/" class="btn btn-default active">Home</a>
-        <a href="/#/community" class="btn btn-default">Community</a>
-        <a href="/#/tests" class="btn btn-default">Tests</a>
-        <a href="/#/users" class="btn btn-default">Users</a>
+    <div class="row">
+        <div class="btn-group" role="group">
+            <a href="/#/" class="btn btn-default active">Home</a>
+            <a href="/#/community" class="btn btn-default">Community</a>
+            <a href="/#/tests" class="btn btn-default">Tests</a>
+            <a href="/#/users" class="btn btn-default">Users</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="panel" ng-controller="TestController as testCtrl" ng-init="testCtrl.globalRedCount()">
+            <h3>Red tests: <span class="label label-default" ng-class="{ 'label-danger': testCtrl.redCount }">{{ testCtrl.redCount }}</span></h3>
+        </div>
+        <div class="panel" ng-controller="ForumController as forumCtrl" ng-init="forumCtrl.loadTopics()">
+            <h3>Topics: <span class="label label-default">{{ forumCtrl.globalTopicCount() }} </span></h3>
+        </div>
+        <div class="panel" ng-controller="IssueController as issueCtrl" ng-init="issueCtrl.loadIssues()">
+            <h3>Issues: <span class="label label-default">{{ issueCtrl.globalIssueCount() }} </span></h3>
+        </div>
     </div>
 </div>

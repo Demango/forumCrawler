@@ -2,14 +2,24 @@
 
 var app = angular.module('app', ['ngRoute']);
 
-app.controller('ForumController', function($http, $routeParams, $scope) {
+app.controller('ForumController', function($http) {
     this.topics = [];
 
     this.loadingTopics = false;
 
     this.activeTab = null;
 
+    this.topicCount = 0;
+
     var self = this;
+
+    this.globalTopicCount = function(){
+        var count = 0;
+        self.topics.forEach(function(forum){
+            count += forum.topics.length;
+        });
+        return count;
+    };
 
     this.toggleActive = function(tab) {
         if (self.activeTab === tab){
@@ -27,7 +37,7 @@ app.controller('ForumController', function($http, $routeParams, $scope) {
     };
 
     this.clearCache = function() {
-        $http.get('/topics/clear-cache').then(function(res) {
+        $http.get('/topics/clear-cache').then(function() {
             self.loadTopics();
             self.topics = [];
         });
@@ -35,7 +45,7 @@ app.controller('ForumController', function($http, $routeParams, $scope) {
 
 });
 
-app.controller('IssueController', function($http, $routeParams, $scope) {
+app.controller('IssueController', function($http) {
 
     this.issuesData = [];
 
@@ -45,6 +55,14 @@ app.controller('IssueController', function($http, $routeParams, $scope) {
 
     var self = this;
 
+    this.globalIssueCount = function(){
+        var count = 0;
+        self.issuesData.forEach(function(repo){
+            count += repo.issues.length;
+        });
+        return count;
+    };
+
     this.toggleActive = function(tab) {
         if (self.activeTab === tab){
             self.activeTab = null;
@@ -52,9 +70,8 @@ app.controller('IssueController', function($http, $routeParams, $scope) {
         else{self.activeTab = tab;}
     };
 
-
     this.clearCache = function() {
-        $http.get('/issues/clear-cache').then(function(res) {
+        $http.get('/issues/clear-cache').then(function() {
             self.loadIssues();
             self.issuesData = [];
         });
@@ -78,7 +95,7 @@ app.controller('IssueController', function($http, $routeParams, $scope) {
     };
 });
 
-app.controller('TestController', function($http, $routeParams, $scope) {
+app.controller('TestController', function($http) {
     this.tests = [];
 
     this.activeTab = null;
@@ -86,6 +103,8 @@ app.controller('TestController', function($http, $routeParams, $scope) {
     this.loadingTests = false;
 
     this.showGreen = false;
+
+    this.redCount = 0;
 
     var self = this;
 
@@ -109,11 +128,14 @@ app.controller('TestController', function($http, $routeParams, $scope) {
         else{self.activeTab = tab;}
     };
 
-    this.loadTests = function() {
+    this.loadTests = function(cb) {
         self.loadingTests = true;
         $http.get('/tests').then(function(res) {
             self.tests = res.data;
             self.loadingTests = false;
+            if (cb) {
+                cb();
+            }
         });
     };
 
@@ -133,8 +155,22 @@ app.controller('TestController', function($http, $routeParams, $scope) {
     return count;
     };
 
+    this.globalRedCount = function(){
+        var count = 0;
+        this.loadTests(function(){
+            self.tests.forEach(function(view){
+                view.tests.forEach(function(test){
+                    if(/^(yellow|red)/.test(test.color)){
+                        count++;
+                    }
+                });
+            });
+            self.redCount = count;
+        });
+    };
+
     this.clearCache = function() {
-        $http.get('/tests/clear-cache').then(function(res) {
+        $http.get('/tests/clear-cache').then(function() {
             self.loadTests();
             self.tests = [];
         });
@@ -142,7 +178,7 @@ app.controller('TestController', function($http, $routeParams, $scope) {
 
 });
 
-app.controller('UserController', function($http, $routeParams, $scope) {
+app.controller('UserController', function($http) {
 
     this.users = [];
     this.user = {};
@@ -169,7 +205,7 @@ app.controller('UserController', function($http, $routeParams, $scope) {
 
 });
 
-app.controller('AppController', function($http, $routeParams, $scope) {
+app.controller('AppController', function() {
     });
 
 app.config(function($routeProvider) {

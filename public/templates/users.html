@@ -22,7 +22,16 @@
             <br>
             Forum:<br>
             <input type="text" name="forum" ng-model="userCtrl.user.forum">
-            <br><br>
+            <br>
+            Potential community manager:
+            <input type="checkbox" name="community" ng-model="userCtrl.user.community">
+            <br>
+            Potential CI manager:
+            <input type="checkbox" name="CI" ng-model="userCtrl.user.CI">
+            <br>
+            Potential maintenance manager:
+            <input type="checkbox" name="maintenance" ng-model="userCtrl.user.maintenance">
+            <br>
             <input class="btn btn-default" type="submit" value="Submit">
         </form>
     </div>
@@ -32,6 +41,9 @@
                 <th>Name</th>
                 <th>Git</th>
                 <th>Forum</th>
+                <th>Com</th>
+                <th>CI</th>
+                <th>Maint</th>
                 <th>Delete</th>
             </thead>
             <tbody>
@@ -39,6 +51,9 @@
                     <td>{{ user.name }}</td>
                     <td>{{ user.git }}</td>
                     <td>{{ user.forum }}</td>
+                    <td><input type="checkbox" disabled ng-model="user.community"></td>
+                    <td><input type="checkbox" disabled ng-model="user.CI"></td>
+                    <td><input type="checkbox" disabled ng-model="user.maintenance"></td>
                     <td>
                         <a ng-click="userCtrl.deleteUser(user)" class="btn btn-default">Delete</a>
                     </td>

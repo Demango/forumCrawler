@@ -31,7 +31,10 @@ exports.createUser = function(data, cb) {
         {
             'name': data.name,
             'git': data.git,
-            'forum': data.forum
+            'forum': data.forum,
+            'community': data.community,
+            'CI': data.CI,
+            'maintenance': data.maintenance
         }
     );
     saveUsers();
