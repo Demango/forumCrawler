@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('app', ['ngRoute']);
+var app = angular.module('app', ['ngRoute', 'ui.sortable']);
 
 app.controller('ForumController', function($http) {
     this.topics = [];
@@ -178,22 +178,45 @@ app.controller('TestController', function($http) {
 
 });
 
-app.controller('UserController', function($http) {
+app.controller('UserController', function($http, $scope) {
 
     this.users = [];
     this.user = {};
+    this.editingUser = {};
     this.showForm = false;
 
     var self = this;
 
+    $scope.sortableOptions = {
+        stop: function() {
+            self.updatePosition();
+        }
+    };
+
+    this.updatePosition = function(){
+        $('table tr td:first-child').each(function(index){
+            $http.post('/users/update_position', { userName: $(this).text().trim(), pos: index });
+            var id = self.users.indexOf(_.findWhere(self.users, {name: $(this).text().trim()}));
+            self.users[id].position = index;
+        });
+    };
+
     this.loadUsers = function() {
         $http.get('/users').then(function(res) {
-            self.users = res.data;
+            self.users = _.sortBy(res.data, 'position');
         });
     };
 
     this.sendForm = function() {
         $http.post('/users', this.user);
+        self.user = {};
+        self.showForm = false;
+        self.loadUsers();
+    };
+
+    this.sendUpdate = function(user) {
+        self.user = user;
+        $http.post('/users/update',  this.user );
         self.user = {};
         self.loadUsers();
     };
@@ -202,6 +225,11 @@ app.controller('UserController', function($http) {
         $http.post('/users/delete', { username: user.name });
         self.loadUsers();
     };
+
+    this.selectEdit = function(user) {
+        self.editingUser = user;
+    };
+
 
 });
 

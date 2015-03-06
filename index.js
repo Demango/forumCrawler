@@ -77,4 +77,17 @@ app.post('/users/delete', function(req, res){
     });
 });
 
+app.post('/users/update/', function(req, res){
+    userApi.updateUser(req.body, function(){
+        res.send('Done');
+    });
+});
+
+app.post('/users/update_position', function(req, res){
+    userApi.updateUserPosition(req.body, function(){
+        res.send('Done');
+    });
+});
+
+
 app.listen(3000);

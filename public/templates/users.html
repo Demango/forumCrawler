@@ -44,18 +44,66 @@
                 <th>Com</th>
                 <th>CI</th>
                 <th>Maint</th>
+                <th>Pos</th>
                 <th>Delete</th>
+                <th>Update</th>
             </thead>
-            <tbody>
+            <tbody ui-sortable="sortableOptions" ng-model="userCtrl.users">
                 <tr ng-repeat="user in userCtrl.users">
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.git }}</td>
-                    <td>{{ user.forum }}</td>
-                    <td><input type="checkbox" disabled ng-model="user.community"></td>
-                    <td><input type="checkbox" disabled ng-model="user.CI"></td>
-                    <td><input type="checkbox" disabled ng-model="user.maintenance"></td>
-                    <td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        {{ user.name }}
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        {{ user.git }}
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        {{ user.forum }}
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        <input type="checkbox" disabled ng-model="user.community">
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        <input type="checkbox" disabled ng-model="user.CI">
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        <input type="checkbox" disabled ng-model="user.maintenance">
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        {{ user.position }}
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
                         <a ng-click="userCtrl.deleteUser(user)" class="btn btn-default">Delete</a>
+                    </td>
+                    <td ng-hide="user == userCtrl.editingUser">
+                        <a ng-click="userCtrl.selectEdit(user)" class="btn btn-default">Update</a>
+                    </td>
+
+                    <td ng-show="user == userCtrl.editingUser">
+                        <input type="text" name="name" ng-model="user.name">
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        <input type="text" name="git" ng-model="user.git">
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        <input type="text" name="forum" ng-model="user.forum">
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        <input type="checkbox" name="community" ng-model="user.community">
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        <input type="checkbox" name="CI" ng-model="user.CI">
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        <input type="checkbox" name="maintenance" ng-model="user.maintenance">
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        {{ user.position }}
+                    </td>
+                    <td ng-show ="user == userCtrl.editingUser">
+                        <a ng-click="userCtrl.deleteUser(user)" class="btn btn-default">Delete</a>
+                    </td>
+                    <td ng-show="user == userCtrl.editingUser">
+                        <a ng-click="userCtrl.sendUpdate(user)" class="btn btn-primary">Update</a>
                     </td>
                 </tr>
             </tbody>
