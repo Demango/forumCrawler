@@ -26,8 +26,6 @@ function download(url, callback) {
   });
 }
 
-var topicCache = [];
-
 function parseAge(age) {
   age = age.replace(/ /g, "");
   age = age.split(",");

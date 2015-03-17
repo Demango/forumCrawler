@@ -188,13 +188,25 @@ app.controller('UserController', function($http, $scope) {
     var self = this;
 
     $scope.sortableOptions = {
+        containment: "window",
+        handle: ".handle",
+        helper: function(e, tr)
+        {
+            var $originals = tr.children();
+            var $helper = tr.clone();
+            $helper.children().each(function(index)
+            {
+                $(this).width($originals.eq(index).width());
+            });
+            return $helper;
+        },
         stop: function() {
             self.updatePosition();
         }
     };
 
     this.updatePosition = function(){
-        $('table tr td:first-child').each(function(index){
+        $('table tr td:nth-child(2)').each(function(index){
             $http.post('/users/update_position', { userName: $(this).text().trim(), pos: index });
             var id = self.users.indexOf(_.findWhere(self.users, {name: $(this).text().trim()}));
             self.users[id].position = index;
@@ -233,30 +245,33 @@ app.controller('UserController', function($http, $scope) {
 
 });
 
-app.controller('AppController', function() {
-    });
+app.controller('AppController', function($http) {
+
+    this.config = {};
+
+    var self = this;
+
+    this.loadConfig = function() {
+        $http.get('/config').then(function(res) {
+            self.config = res.data;
+        });
+    };
+
+});
 
 app.config(function($routeProvider) {
     $routeProvider.
         when('/', {
-            templateUrl: 'templates/index.html',
-            controller: 'AppController',
-            controllerAs: 'app'
+            templateUrl: 'templates/index.html'
         }).
         when('/community', {
-            templateUrl: 'templates/community.html',
-            controller: 'AppController',
-            controllerAs: 'app'
+            templateUrl: 'templates/community.html'
         }).
         when('/tests', {
-            templateUrl: 'templates/tests.html',
-            controller: 'AppController',
-            controllerAs: 'app'
+            templateUrl: 'templates/tests.html'
         }).
         when('/users', {
-            templateUrl: 'templates/users.html',
-            controller: 'AppController',
-            controllerAs: 'app'
+            templateUrl: 'templates/users.html'
         }).
 
         otherwise({

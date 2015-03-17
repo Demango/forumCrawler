@@ -1,17 +1,11 @@
+        <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-primary" ng-class="{ active: userCtrl.showForm }">
+                <input type="checkbox" autocomplete="off" ng-model="userCtrl.showForm"> New user
+            </label>
+        </div>
+    </div>
+</div>
 <div class="container-fluid" ng-controller="UserController as userCtrl">
-
-    <div class="btn-group" role="group">
-        <a href="/#/" class="btn btn-default">Home</a>
-        <a href="/#/community" class="btn btn-default">Community</a>
-        <a href="/#/tests" class="btn btn-default">Tests</a>
-        <a href="/#/users" class="btn btn-default active">Users</a>
-    </div>
-
-    <div class="btn-group" data-toggle="buttons">
-        <label class="btn btn-primary" ng-class="{ active: userCtrl.showForm }">
-            <input type="checkbox" autocomplete="off" ng-model="userCtrl.showForm"> New user
-        </label>
-    </div>
     <div ng-show="userCtrl.showForm">
         <form ng-submit="userCtrl.sendForm()">
             Name:<br>
@@ -38,6 +32,7 @@
     <section ng-init="userCtrl.loadUsers()">
         <table class="table table-hover">
             <thead>
+                <th></th>
                 <th>Name</th>
                 <th>Git</th>
                 <th>Forum</th>
@@ -50,6 +45,9 @@
             </thead>
             <tbody ui-sortable="sortableOptions" ng-model="userCtrl.users">
                 <tr ng-repeat="user in userCtrl.users">
+                    <td>
+                        <span class="glyphicon glyphicon-sort handle">
+                    </td>
                     <td ng-hide="user == userCtrl.editingUser">
                         {{ user.name }}
                     </td>

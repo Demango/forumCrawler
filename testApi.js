@@ -101,6 +101,13 @@ exports.downloadTests = function(cb) {
     });
 };
 
+exports.getToken = function(cb) {
+    if (jenkinsUrl && jenkinsAuth){
+        cb('found');
+    } else { cb(); }
+
+};
+
 exports.getTestInfo = function(name, cb) {
     var url = '/job/' + name +'/api/json';
 

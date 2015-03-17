@@ -7,6 +7,7 @@ var fs = require('fs');
 var async = require('async');
 var util = require('util');
 var _ = require('underscore');
+var Q = require('q');
 
 var ghToken = null;
 if (fs.existsSync('./parameters.json')) {
@@ -19,10 +20,60 @@ if (fs.existsSync('./users.json')) {
 }
 
 var isWhitelisted = function(issue) {
-    if(!issue){
-        return false;
+    var deferred = Q.defer();
+
+    if (!issue) {
+        deferred.resolve(false);
     }
-    return _.where(users, {git: issue.user.login})[0] !== undefined;
+
+    if (issue.comments) {
+        if (_.where(users, {git: issue.user.login})[0] !== undefined){
+            deferred.resolve(_.where(users, {git: issue.user.login})[0] !== undefined);
+        }
+        else{
+            downloadJSON(issue.comments_url, function(data){
+                deferred.resolve(_.where(users, {git: data[data.length-1].user.login})[0] !== undefined);
+            });
+        }
+
+    } else {
+        deferred.resolve(_.where(users, {git: issue.user.login})[0] !== undefined);
+    }
+
+    return deferred.promise;
+};
+
+var filterIssues = function (issues) {
+    var deferred = Q.defer();
+    var promises = [];
+    var goodIssues = [];
+
+    _.each(issues, function (issue) {
+        promises.push(isWhitelisted(issue).then(function (whitelisted) {
+            if (!whitelisted){
+                goodIssues.push(issue);
+            }
+        }));
+    });
+
+    Q.all(promises).then(function() {
+        console.log('promises done');
+        console.log(arguments);
+        deferred.resolve(goodIssues);
+    });
+
+    return deferred.promise;
+
+    // return isWhitelisted(issue)
+    //     .then(function(whitelisted){
+    //         deferred.resolve(whitelisted);
+    //         console.log(deferred.promise);
+    //         return deferred.promise;
+    //     })
+    //     .catch(function(err) {
+    //         console.error(err);
+    //     })
+    //     .done();
 };
 
 function downloadJSON(url, callback) {
@@ -80,13 +131,17 @@ exports.downloadIssues = function(cb) {
         async.eachSeries(repos, function(repo, callback) {
             console.log('Downloading issues from', repo.full_name);
             downloadJSON('/repos/akeneo/' + repo.name + '/issues', function(data) {
-                data = _.filter(data, function(issue) {
-                        return !isWhitelisted(issue);
-                    });
-                issues.push({
-                    repo: repo,
-                    issues: data
-                });
+                filterIssues(data)
+                    .then(function(data){
+                        issues.push({
+                            repo: repo,
+                            issues: data
+                        });
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    })
+                    .done();
                 callback();
             });
         }, function() {

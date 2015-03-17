@@ -16,6 +16,12 @@ app.use(bodyParser());
 app.use(express.static('public'));
 app.use(express.static('bower_components'));
 
+app.get('/config', function(req, res) {
+    testApi.getToken(function(token) {
+        res.json({'showTests': token === "found"});
+    });
+});
+
 app.get('/', function(req, res) {
     res.render('index', {title:"Crawler"});
 });
