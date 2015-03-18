@@ -14,8 +14,10 @@ module.exports = function (app) {
     });
 
     app.get('/tests/clear-cache', function(req, res) {
-        testApi.clearCache();
-        res.send('Done');
+        if (req.user){
+            testApi.clearCache();
+            res.send('Done');
+        } else { res.send(); }
     });
 
     app.get('/tests/:name', function(req, res) {

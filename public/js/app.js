@@ -244,6 +244,7 @@ app.controller('UserController', function($http, $scope) {
 app.controller('AppController', function($http) {
 
     this.config = {};
+    this.location = null;
 
     var self = this;
 
@@ -252,6 +253,7 @@ app.controller('AppController', function($http) {
             self.config = res.data;
         });
     };
+
 });
 
 app.controller('LoginController', function($http, $location) {

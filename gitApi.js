@@ -76,6 +76,14 @@ var filterIssues = function (issues) {
     //     .done();
 };
 
+function clearCache() {
+    if (fs.existsSync("/tmp/issues.json")) {
+        fs.unlink("/tmp/issues.json");
+        console.log('Cache cleared');
+    }
+}
+exports.clearCache = clearCache;
+
 function downloadJSON(url, callback) {
     var headers = {
         "user-agent": "forum-app",

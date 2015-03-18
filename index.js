@@ -44,30 +44,10 @@ app.get('/', function(req, res) {
     res.render('index', {title:"Crawler"});
 });
 
-app.get('/topics', function(req, res) {
-    forumApi.getTopics(function(topics) {
-        res.json(topics);
-    });
-});
-
-app.get('/topics/clear-cache', function(req, res) {
-    forumApi.clearCache();
-    res.send('Done');
-});
-
-app.get('/issues', function(req, res) {
-    gitApi.downloadIssues(function(issues) {
-        res.json(issues);
-    });
-});
-
-app.get('/issues/clear-cache', function(req, res) {
-    forumApi.clearIssuesCache();
-    res.send('Done');
-});
-
 require('./routes/tests')(app);
 require('./routes/users')(app);
+require('./routes/issues')(app);
+require('./routes/topics')(app);
 
 var initPassport = require('./passport/init');
 initPassport(passport);

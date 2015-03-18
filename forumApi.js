@@ -168,13 +168,5 @@ function clearCache() {
   }
 }
 
-function clearIssuesCache() {
-  if (fs.existsSync("/tmp/issues.json")) {
-    fs.unlink("/tmp/issues.json");
-    console.log('Cache cleared');
-  }
-}
-
 exports.getTopics = downloadTopics;
 exports.clearCache = clearCache;
-exports.clearIssuesCache = clearIssuesCache;
