@@ -11,7 +11,6 @@ var expressSession = require('express-session');
 var forumApi = require('./forumApi');
 var gitApi = require('./gitApi');
 var testApi = require('./testApi');
-var userApi = require('./userApi');
 
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
@@ -61,41 +60,11 @@ app.get('/issues/clear-cache', function(req, res) {
 });
 
 require('./routes/tests')(app);
+require('./routes/users')(app);
 
 var initPassport = require('./passport/init');
 initPassport(passport);
 
 require('./routes/passport')(app);
-
-app.get('/users', function(req, res) {
-    userApi.getUsers(function(users) {
-        res.json(users);
-    });
-});
-
-app.post('/users', function(req, res){
-    userApi.createUser(req.body, function(){
-        res.send('Done');
-    });
-});
-
-app.post('/users/delete', function(req, res){
-    userApi.deleteUser(req.body.username, function(){
-        res.send('Done');
-    });
-});
-
-app.post('/users/update/', function(req, res){
-    userApi.updateUser(req.body, function(){
-        res.send('Done');
-    });
-});
-
-app.post('/users/update_position', function(req, res){
-    userApi.updateUserPosition(req.body, function(){
-        res.send('Done');
-    });
-});
-
 
 app.listen(3000);
