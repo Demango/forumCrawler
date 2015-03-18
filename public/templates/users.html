@@ -1,11 +1,9 @@
-        <div class="btn-group" data-toggle="buttons">
-            <label class="btn btn-primary" ng-class="{ active: userCtrl.showForm }">
-                <input type="checkbox" autocomplete="off" ng-model="userCtrl.showForm"> New user
-            </label>
-        </div>
-    </div>
-</div>
 <div class="container-fluid" ng-controller="UserController as userCtrl">
+    <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-primary" ng-class="{ active: userCtrl.showForm }">
+            <input type="checkbox" autocomplete="off" ng-model="userCtrl.showForm"> New user
+        </label>
+    </div>
     <div ng-show="userCtrl.showForm">
         <form ng-submit="userCtrl.sendForm()">
             Name:<br>

@@ -1,4 +1,6 @@
 <div ng-controller="AppController as app" ng-init="app.loadConfig()">
+    <a href="/#/sign-in" style="float: right" ng-if="!app.config.signedIn">Sign in</a>
+    <a ng-click="loginCtrl.signOut(); app.loadConfig()" ng-controller="LoginController as loginCtrl" style="float: right" ng-if="app.config.signedIn">Sign out</a>
     <div class="container-fluid">
         <div class="row">
             <div class="btn-group" role="group">
@@ -6,6 +8,8 @@
                 <a href="/#/community" class="btn btn-default">Community</a>
                 <a href="/#/tests" class="btn btn-default" ng-show="app.config.showTests">Tests</a>
                 <a href="/#/users" class="btn btn-default">Users</a>
-                <div ng-view></div>
+            </div>
+        </div>
     </div>
+    <div ng-view></div>
 </div>

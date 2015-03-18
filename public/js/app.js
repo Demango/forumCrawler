@@ -42,7 +42,6 @@ app.controller('ForumController', function($http) {
             self.topics = [];
         });
     };
-
 });
 
 app.controller('IssueController', function($http) {
@@ -175,7 +174,6 @@ app.controller('TestController', function($http) {
             self.tests = [];
         });
     };
-
 });
 
 app.controller('UserController', function($http, $scope) {
@@ -241,8 +239,6 @@ app.controller('UserController', function($http, $scope) {
     this.selectEdit = function(user) {
         self.editingUser = user;
     };
-
-
 });
 
 app.controller('AppController', function($http) {
@@ -256,7 +252,33 @@ app.controller('AppController', function($http) {
             self.config = res.data;
         });
     };
+});
 
+app.controller('LoginController', function($http, $location) {
+
+    this.login = function(user) {
+        $http.post('/login', user).then(function(response) {
+            console.log(response);
+            window.response = response;
+            if (response.status == 200) {
+                $location.path('/');
+            }
+        });
+    };
+
+    this.signUp = function(user) {
+        $http.post('/signup', user).then(function(response) {
+            console.log(response);
+            window.response = response;
+            if (response.status == 200) {
+                $location.path('/');
+            }
+        });
+    };
+
+    this.signOut = function() {
+        $http.post('/signout');
+    };
 });
 
 app.config(function($routeProvider) {
@@ -272,6 +294,12 @@ app.config(function($routeProvider) {
         }).
         when('/users', {
             templateUrl: 'templates/users.html'
+        }).
+        when('/sign-in', {
+            templateUrl: 'templates/sign-in.html'
+        }).
+        when('/sign-up', {
+            templateUrl: 'templates/sign-up.html'
         }).
 
         otherwise({

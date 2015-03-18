@@ -1,0 +1,10 @@
+<div class="container-fluid">
+    <div class="row" ng-controller="LoginController as loginCtrl" style="width: 450px">
+        <form ng-submit="loginCtrl.signUp(user)">
+            <input type="text" name="username" class="form-control" placeholder="Username" required autofocus ng-model="user.username">
+            <input type="password" name="password" placeholder="Password" required ng-model="user.password">
+            <input class="btn btn-lg btn-primary" type="submit" value="Sign up">
+        </form>
+        <a href="/#/sign-in">Already have an account? Click here to sing-in.</a>
+    </div>
+</div>

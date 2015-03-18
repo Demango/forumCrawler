@@ -4,6 +4,9 @@ var express = require('express');
 var app = express();
 var hbs = require('hbs');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var expressSession = require('express-session');
 
 var forumApi = require('./forumApi');
 var gitApi = require('./gitApi');
@@ -16,10 +19,18 @@ app.use(bodyParser());
 app.use(express.static('public'));
 app.use(express.static('routes'));
 app.use(express.static('bower_components'));
+app.use(expressSession({secret: 'mySecretKey'}));
+app.use(passport.initialize());
+app.use(passport.session());
+mongoose.connect('mongodb://localhost/passport');
+
 
 app.get('/config', function(req, res) {
     testApi.getToken(function(token) {
-        res.json({'showTests': token});
+        res.json({
+            'showTests': token,
+            'signedIn': req.user ? true : false
+        });
     });
 });
 
@@ -50,6 +61,11 @@ app.get('/issues/clear-cache', function(req, res) {
 });
 
 require('./routes/tests')(app);
+
+var initPassport = require('./passport/init');
+initPassport(passport);
+
+require('./routes/passport')(app);
 
 app.get('/users', function(req, res) {
     userApi.getUsers(function(users) {

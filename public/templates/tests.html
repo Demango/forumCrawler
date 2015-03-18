@@ -1,15 +1,11 @@
-        <div class="btn-group" data-toggle="buttons">
-            <label class="btn btn-primary" ng-class="{ active: testCtrl.showGreen }">
-                <input type="checkbox" autocomplete="off" ng-model="testCtrl.showGreen"> Show green
-            </label>
-        </div>
-    </div>
-</div>
-
-
-<div class="row">
+<div class="row" ng-controller="TestController as testCtrl">
     <div class="col-md-6 col-sm-6" ng-show="app.config.showTests">
-        <section ng-controller="TestController as testCtrl" ng-init="testCtrl.loadTests()">
+        <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-primary" ng-class="{ active: testCtrl.showGreen }">
+            <input type="checkbox" autocomplete="off" ng-model="testCtrl.showGreen"> Show green
+        </label>
+    </div>
+        <section ng-init="testCtrl.loadTests()">
             <div class="list-group">
                 <div class="log-window" style="width: 450px">
                     <button ng-click="testCtrl.clearCache()" class="btn btn-default">Clear cache</button>
@@ -46,9 +42,6 @@
                     </div>
                 </div>
             </div>
-        </section>
-        <section ng-hide="app.config.showTests">
-            <h3>No valid authorization found!</h3>
         </section>
     </div>
 </div>
