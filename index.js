@@ -7,10 +7,17 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var expressSession = require('express-session');
+var fs = require('fs');
 
 var forumApi = require('./forumApi');
 var gitApi = require('./gitApi');
 var testApi = require('./testApi');
+
+var sessionKey = null;
+if (fs.existsSync('./parameters.json')) {
+    var parameters = JSON.parse(fs.readFileSync('./parameters.json', 'utf8'));
+    sessionKey = parameters.sessionKey || null;
+}
 
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
@@ -18,7 +25,7 @@ app.use(bodyParser());
 app.use(express.static('public'));
 app.use(express.static('routes'));
 app.use(express.static('bower_components'));
-app.use(expressSession({secret: 'mySecretKey'}));
+app.use(expressSession({secret: sessionKey}));
 app.use(passport.initialize());
 app.use(passport.session());
 mongoose.connect('mongodb://localhost/passport');
