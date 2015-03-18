@@ -11,7 +11,6 @@
     "underscore": "~1.8.2",
     "mongoose": "~3.8.24",
     "q": "~1.2.0",
-    "express-stormpath": "~0.6.9",
     "passport": "~0.2.1",
     "passport-local": "~1.0.0",
     "express-session": "~1.10.4",
