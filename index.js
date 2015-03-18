@@ -14,11 +14,12 @@ app.set('view engine', 'html');
 app.engine('html', hbs.__express);
 app.use(bodyParser());
 app.use(express.static('public'));
+app.use(express.static('routes'));
 app.use(express.static('bower_components'));
 
 app.get('/config', function(req, res) {
     testApi.getToken(function(token) {
-        res.json({'showTests': token === "found"});
+        res.json({'showTests': token});
     });
 });
 
@@ -48,22 +49,7 @@ app.get('/issues/clear-cache', function(req, res) {
     res.send('Done');
 });
 
-app.get('/tests', function(req, res) {
-    testApi.downloadTests(function(tests) {
-        res.json(tests);
-    });
-});
-
-app.get('/tests/clear-cache', function(req, res) {
-    testApi.clearCache();
-    res.send('Done');
-});
-
-app.get('/tests/:name', function(req, res) {
-    testApi.getTestInfo(req.params.name, function(testInfo) {
-        res.json(testInfo);
-    });
-});
+require('./routes/tests')(app);
 
 app.get('/users', function(req, res) {
     userApi.getUsers(function(users) {

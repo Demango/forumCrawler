@@ -103,9 +103,16 @@ exports.downloadTests = function(cb) {
 
 exports.getToken = function(cb) {
     if (jenkinsUrl && jenkinsAuth){
-        cb('found');
-    } else { cb(); }
+        cb(true);
+    } else { cb(false); }
+};
 
+exports.hasToken = function() {
+    var token;
+    exports.getToken(function(res){
+        token = res;
+    });
+    return token;
 };
 
 exports.getTestInfo = function(name, cb) {
@@ -119,5 +126,4 @@ exports.getTestInfo = function(name, cb) {
             cb([]);
         }
     });
-
 };
