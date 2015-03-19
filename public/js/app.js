@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('app', ['ngRoute', 'ui.sortable']);
+var app = angular.module('app', ['ngRoute']);
 
 app.controller('ForumController', function($http) {
     this.topics = [];
@@ -185,35 +185,9 @@ app.controller('UserController', function($http, $scope) {
 
     var self = this;
 
-    $scope.sortableOptions = {
-        containment: "window",
-        handle: ".handle",
-        helper: function(e, tr)
-        {
-            var $originals = tr.children();
-            var $helper = tr.clone();
-            $helper.children().each(function(index)
-            {
-                $(this).width($originals.eq(index).width());
-            });
-            return $helper;
-        },
-        stop: function() {
-            self.updatePosition();
-        }
-    };
-
-    this.updatePosition = function(){
-        $('table tr td:nth-child(2)').each(function(index){
-            $http.post('/users/update_position', { userName: $(this).text().trim(), pos: index });
-            var id = self.users.indexOf(_.findWhere(self.users, {name: $(this).text().trim()}));
-            self.users[id].position = index;
-        });
-    };
-
     this.loadUsers = function() {
         $http.get('/users').then(function(res) {
-            self.users = _.sortBy(res.data, 'position');
+            self.users = res.data;
         });
     };
 

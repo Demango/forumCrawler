@@ -9,8 +9,6 @@ var passport = require('passport');
 var expressSession = require('express-session');
 var fs = require('fs');
 
-var forumApi = require('./forumApi');
-var gitApi = require('./gitApi');
 var testApi = require('./testApi');
 
 var sessionKey = null;

@@ -2,10 +2,22 @@
 
 var fs = require('fs');
 var _ = require('underscore');
+var User = require('./models/setUser');
 
-if (fs.existsSync('./users.json')) {
-    var users = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
-}
+var users = [];
+
+User.find({}).sort('position').exec(
+    function(err, setUsers) {
+        if (err){
+            console.error(err);
+        }
+        if (!setUsers){
+            console.log('No users found');
+        }
+        users = setUsers;
+        console.log(users);
+    }
+);
 
 function saveUsers(){
     fs.writeFile("./users.json", JSON.stringify(users), function(err) {
@@ -13,6 +25,36 @@ function saveUsers(){
             console.log(err);
         }
       });
+
+    User.remove({}, function(err) {
+        if(err){
+            console.error(err);
+        } else { console.log('collection removed'); }
+    });
+
+    users.forEach(function(user){
+
+        var newUser = new User();
+
+
+        newUser.name = user.name;
+        newUser.git = user.git;
+        newUser.forum = user.forum;
+        newUser.community = user.community;
+        newUser.CI = user.CI;
+        newUser.maintenance = user.maintenance;
+        newUser.position = user.position;
+
+        newUser.save(function(err) {
+            if (err){
+                console.log('Error in Saving user: '+err);
+                throw err;
+            }
+            console.log('User Saving succesful');
+        });
+    });
+
+
 }
 
 exports.createUser = function(data, cb) {

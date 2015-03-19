@@ -24,28 +24,28 @@
             Potential maintenance manager:
             <input type="checkbox" name="maintenance" ng-model="userCtrl.user.maintenance">
             <br>
+            <br>
+            Position:<br>
+            <input type="text" name="position" ng-model="userCtrl.user.position">
+            <br>
             <input class="btn btn-default" type="submit" value="Submit">
         </form>
     </div>
     <section ng-init="userCtrl.loadUsers()">
         <table class="table table-hover">
             <thead>
-                <th></th>
                 <th>Name</th>
                 <th>Git</th>
                 <th>Forum</th>
                 <th>Com</th>
                 <th>CI</th>
                 <th>Maint</th>
-                <th>Pos</th>
+                <th>Position</th>
                 <th>Delete</th>
                 <th>Update</th>
             </thead>
-            <tbody ui-sortable="sortableOptions" ng-model="userCtrl.users">
+            <tbody ng-model="userCtrl.users">
                 <tr ng-repeat="user in userCtrl.users">
-                    <td>
-                        <span class="glyphicon glyphicon-sort handle">
-                    </td>
                     <td ng-hide="user == userCtrl.editingUser">
                         {{ user.name }}
                     </td>
@@ -93,7 +93,7 @@
                         <input type="checkbox" name="maintenance" ng-model="user.maintenance">
                     </td>
                     <td ng-show="user == userCtrl.editingUser">
-                        {{ user.position }}
+                        <input type="text" name="position" ng-model="user.position">
                     </td>
                     <td ng-show ="user == userCtrl.editingUser">
                         <a ng-click="userCtrl.deleteUser(user)" class="btn btn-default">Delete</a>
