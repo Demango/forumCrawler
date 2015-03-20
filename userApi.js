@@ -1,6 +1,5 @@
 'use strict';
 
-var fs = require('fs');
 var _ = require('underscore');
 var User = require('./models/setUser');
 
@@ -15,16 +14,10 @@ User.find({}).sort('position').exec(
             console.log('No users found');
         }
         users = setUsers;
-        console.log(users);
     }
 );
 
 function saveUsers(){
-    fs.writeFile("./users.json", JSON.stringify(users), function(err) {
-        if(err) {
-            console.log(err);
-        }
-      });
 
     User.remove({}, function(err) {
         if(err){

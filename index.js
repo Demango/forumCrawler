@@ -26,7 +26,7 @@ app.use(express.static('bower_components'));
 app.use(expressSession({secret: sessionKey}));
 app.use(passport.initialize());
 app.use(passport.session());
-mongoose.connect('mongodb://localhost/passport');
+mongoose.connect('mongodb://localhost/crawler');
 
 
 app.get('/config', function(req, res) {
