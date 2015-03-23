@@ -1,13 +1,14 @@
 'use strict';
 
-var http = require("http");
-var cheerio = require("cheerio");
+var http = require('http');
+var cheerio = require('cheerio');
 var async = require('async');
-var fs = require('fs');
+var Q = require('q');
 var Forum = require('./models/forum');
 var Topic = require('./models/topic');
+var userApi = require('./userApi');
 
-var forumUrl = "http://www.akeneo.com/forums/";
+var forumUrl = 'http://www.akeneo.com/forums/';
 
 function download(url, callback) {
     http.get(url, function(res) {
@@ -58,11 +59,62 @@ function parseAge(age) {
     return new Date(Date.now() - parsedAge);
 }
 
+function updateForum (forumData, callback) {
+    Forum.findOne({ 'url' :  forumData.url },function(err, forum) {
+        if (!forum) {
+            forum = new Forum();
+            console.log('making new entry');
+        }
+
+        if (forum.topic_count == forumData.topic_count &&
+            forum.reply_count == forumData.reply_count &&
+            !forum.needs_update
+        ) {
+            forum.needs_update = false;
+        } else {
+            forum.needs_update = true;
+        }
+
+        forum.url = forumData.url;
+        forum.name = forumData.name;
+        forum.topic_count = forumData.topic_count;
+        forum.reply_count = forumData.reply_count;
+        forum.freshness = forumData.freshness;
+
+        forum.save(function(err) {
+            if (err){
+                console.error('Error in Saving forum: '+err);
+            }
+            console.log('Forum Saving succesful');
+            callback();
+        });
+    });
+}
+
+function markForumUpdated (forumData){
+    var deferred = Q.defer();
+
+    Forum.findOne({ 'url' :  forumData.url },function(err, forum) {
+        if (err) {
+            console.error(err);
+        }
+
+        forum.needs_update = false;
+        forum.save(function(err) {
+            if (err){
+                console.error('Error in Saving forum: '+err);
+            }
+            console.log('Forum Saving succesful');
+            deferred.resolve();
+        });
+    });
+
+    return deferred.promise;
+}
 
 function downloadForums(cb) {
-    var forums = [];
-
     download(forumUrl, function(data) {
+        var forums = [];
         if (data) {
             var $ = cheerio.load(data);
             $("a.bbp-forum-title").each(function(i, e) {
@@ -76,68 +128,132 @@ function downloadForums(cb) {
                     }
                 );
             });
-            forums.forEach(function(forumData){
-                Forum.findOne({ 'url' :  forumData.url },function(err, forum) {
-                    if (!forum) {
-                        forum = new Forum();
-                        console.log('making new entry');
-                    }
-
-                    if (
-                        forum.topic_count == forumData.topic_count &&
-                        forum.reply_count == forumData.reply_count
-                    ){
-                        forum.needs_update = false;
-                    } else { forum.needs_update = true; }
-                    forum.url = forumData.url;
-                    forum.name = forumData.name;
-                    forum.topic_count = forumData.topic_count;
-                    forum.reply_count = forumData.reply_count;
-                    forum.freshness = forumData.freshness;
-
-                    forum.save(function(err) {
-                        if (err){
-                            console.error('Error in Saving forum: '+err);
-                        }
-                        console.log('Forum Saving succesful');
-                    });
-                });
-            });
+            async.eachSeries(
+                forums,
+                updateForum,
+                function () {
+                    console.log('forums up to date');
+                    cb();
+                }
+            );
+        } else {
+            console.log('nothing found');
+            cb();
         }
-        cb(forums);
     });
 }
 
 function getTopics(cb) {
-    Topic.find(function(err, topics){
-        if (err){
-            console.error(err);
-        }
-        cb(topics);
-    });
-}
-
-function downloadTopics(cb) {
-    if (fs.existsSync('/tmp/topics.json')) {
-        console.log('Loading topics from cache file');
-        var cachedTopics = fs.readFileSync('/tmp/topics.json', 'utf-8');
-        topics = JSON.parse(cachedTopics).topics;
-        return cb(topics);
-    }
+    var promises = [];
 
     var topics = [];
-
-    downloadForums(function(forums) {
-        forums.forEach(function(forum) {
-            if (forum.needs_update){
-                downloadForumTopics(forum.url);
-            }
+    userApi.getForumNames().done(function (usernames) {
+        Forum.find(function(err, forums){
+            forums.forEach(function(forum){
+                promises.push(Topic.find({'author': { $nin: usernames }, 'forum': forum._id})
+                    .populate('forum')
+                    .lean()
+                    .exec(function(err, topicData) {
+                        if (err) {
+                            console.error(err);
+                        }
+                        topics.push({
+                            'forum': forum,
+                            'topics': topicData
+                        });
+                    }));
+            });
+            Q.all(promises).done(function () {
+                cb(topics);
+            });
         });
     });
 }
 
-function downloadForumTopics(url) {
+function downloadTopics(callback) {
+    var deferred = Q.defer();
+    var promises = [];
+
+    downloadForums(function() {
+        Forum.find({ 'needs_update': true }, function(err, forums) {
+            forums.forEach(function (forum) {
+                promises.push(downloadForumTopics(forum));
+            });
+
+            Q.all(promises).done(function () {
+                console.log('everything up to date');
+                callback();
+                deferred.resolve();
+            });
+        });
+    });
+
+    return deferred.promise;
+}
+
+function downloadTopicPage(url, forum) {
+    var deferred = Q.defer();
     var topics = [];
+
+    download(url, function(data) {
+        var $ = cheerio.load(data);
+        $("ul.topic:not(.super-sticky) a.bbp-topic-permalink").each(function(i, e) {
+            var resolved = $(e).siblings('span.resolved').length;
+            // console.log('resolved:', resolved);
+            var title = $(e).attr("title");
+            // console.log('title:', title);
+            var author = $(e).parent().siblings('.bbp-topic-freshness').find('.bbp-topic-freshness-author .bbp-author-name').text();
+            // console.log('author:', author);
+            var age = $(e).parent().siblings('.bbp-topic-freshness').find('a').text().replace(/ago.*$/i, "");
+            age = parseAge(age);
+            // console.log('age:', age);
+            if (!resolved) {
+                topics.push({
+                    url: $(e).attr("href"),
+                    title: title,
+                    author: author,
+                    age: age,
+                    forum: forum
+                });
+            }
+        });
+        deferred.resolve(topics);
+    });
+
+    return deferred.promise;
+}
+
+function updateTopic(topicData) {
+    var deferred = Q.defer();
+
+    Topic.findOne({ 'url' :  topicData.url },function(err, topic) {
+        if (!topic) {
+            topic = new Topic();
+            console.log('making new entry');
+        }
+
+        topic.url = topicData.url;
+        topic.title = topicData.title;
+        topic.author = topicData.author;
+        topic.age = topicData.age;
+        topic.forum = topicData.forum._id;
+
+        topic.save(function(err) {
+            if (err){
+                console.error('Error in Saving topic: '+err);
+            }
+            console.log('Topic Saving succesful');
+            deferred.resolve();
+        });
+    });
+
+    return deferred.promise;
+}
+
+function downloadForumTopics(forum) {
+    var url = forum.url;
+    var promises = [];
+    var updatePromises = [];
     var urls = [];
     urls.push(url);
 
@@ -145,65 +261,28 @@ function downloadForumTopics(url) {
         urls.push(url + 'page/' + j + '/');
     }
 
-    async.eachSeries(
-        urls,
-        function(url, callback) {
-            download(url, function(data) {
-                if (data) {
-                    var $ = cheerio.load(data);
-                    $("ul.topic:not(.super-sticky) a.bbp-topic-permalink").each(function(i, e) {
-                        var resolved = $(e).siblings('span.resolved').length;
-                        console.log('resolved:', resolved);
-                        var title = $(e).attr("title");
-                        console.log('title:', title);
-                        var author = $(e).parent().siblings('.bbp-topic-freshness').find('.bbp-topic-freshness-author .bbp-author-name').text();
-                        console.log('author:', author);
-                        var age = $(e).parent().siblings('.bbp-topic-freshness').find('a').text().replace(/ago.*$/i, "");
-                        age = parseAge(age);
-                        console.log('age:', age);
-                        if (!resolved) {
-                            topics.push(
-                            {
-                                url: $(e).attr("href"),
-                                title: title,
-                                author: author,
-                                age: age
-                            });
-                        }
-                    });
-                }
-                callback();
-            });
-        }, function () {
-            topics.forEach(function(topicData){
-                Topic.findOne({ 'url' :  topicData.url },function(err, topic) {
-                    if (!topic) {
-                        topic = new Topic();
-                        console.log('making new entry');
-                    }
-                    topic.url = topicData.url;
-                    topic.title = topicData.title;
-                    topic.author = topicData.author;
-                    topic.age = topicData.age;
+    var deferred = Q.defer();
 
-                    topic.save(function(err) {
-                        if (err){
-                            console.error('Error in Saving topic: '+err);
-                        }
-                        console.log('Topic Saving succesful');
-                    });
-                });
-            });
-        }
-    );
-}
+    urls.forEach(function(url) {
+        promises.push(downloadTopicPage(url, forum));
+    });
 
-function clearCache() {
-    if (fs.existsSync("/tmp/topics.json")) {
-        fs.unlink("/tmp/topics.json");
-        console.log('Cache cleared');
-    }
+    Q.all(promises).done(function(results) {
+        results.forEach(function (topics) {
+            topics.forEach(function (topic) {
+                updatePromises.push(updateTopic(topic));
+            });
+        });
+
+        updatePromises.push(markForumUpdated(forum));
+
+        Q.all(updatePromises).done(function() {
+            deferred.resolve();
+        });
+    });
+
+    return deferred.promise;
 }
 
 exports.getTopics = getTopics;
-exports.clearCache = clearCache;
+exports.clearCache = downloadTopics;

@@ -1,21 +1,12 @@
 'use strict';
 
 var _ = require('underscore');
+var Q = require('q');
 var User = require('./models/setUser');
+var SetUser = require('./models/setUser');
+
 
 var users = [];
-
-User.find({}).sort('position').exec(
-    function(err, setUsers) {
-        if (err){
-            console.error(err);
-        }
-        if (!setUsers){
-            console.log('No users found');
-        }
-        users = setUsers;
-    }
-);
 
 function saveUsers(){
 
@@ -46,8 +37,6 @@ function saveUsers(){
             console.log('User Saving succesful');
         });
     });
-
-
 }
 
 exports.createUser = function(data, cb) {
@@ -88,5 +77,36 @@ exports.updateUser = function(user, cb) {
 
 
 exports.getUsers = function(cb) {
+    User.find({}).sort('position').exec(
+        function(err, setUsers) {
+            if (err){
+                console.error(err);
+            }
+            if (!setUsers){
+                console.log('No users found');
+            }
+            users = setUsers;
+        }
+    );
+
     cb(users);
+};
+
+exports.getForumNames = function () {
+    var deferred = Q.defer();
+    var forumNames = [];
+
+    SetUser.find({}, 'forum', function(err, users) {
+        if (err) {
+            console.error(err);
+        }
+        users.forEach(function(user){
+            if (user.forum){
+                forumNames.push(user.forum);
+            }
+        });
+        deferred.resolve(forumNames);
+    });
+
+    return deferred.promise;
 };

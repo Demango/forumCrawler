@@ -64,16 +64,6 @@ var filterIssues = function (issues) {
 
     return deferred.promise;
 
-    // return isWhitelisted(issue)
-    //     .then(function(whitelisted){
-    //         deferred.resolve(whitelisted);
-    //         console.log(deferred.promise);
-    //         return deferred.promise;
-    //     })
-    //     .catch(function(err) {
-    //         console.error(err);
-    //     })
-    //     .done();
 };
 
 function clearCache() {
