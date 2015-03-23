@@ -110,3 +110,16 @@ exports.getForumNames = function () {
 
     return deferred.promise;
 };
+
+exports.getGitNames = function () {
+    var deferred = Q.defer();
+
+    SetUser.find({}, 'git', function(err, users) {
+        if (err) {
+            console.error(err);
+        }
+        deferred.resolve(users);
+    });
+
+    return deferred.promise;
+};
