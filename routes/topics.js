@@ -12,8 +12,9 @@ module.exports = function (app) {
 
     app.get('/topics/clear-cache', function(req, res) {
         if (req.user){
-            forumApi.clearCache();
-            res.send('Done');
+            forumApi.clearCache(function () {
+                res.send('Done');
+            });
         } else { res.send(); }
     });
 

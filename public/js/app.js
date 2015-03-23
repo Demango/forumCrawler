@@ -176,7 +176,7 @@ app.controller('TestController', function($http) {
     };
 });
 
-app.controller('UserController', function($http, $scope) {
+app.controller('UserController', function($http) {
 
     this.users = [];
     this.user = {};
