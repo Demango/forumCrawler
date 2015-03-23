@@ -8,15 +8,14 @@ var async = require('async');
 var util = require('util');
 var _ = require('underscore');
 var Q = require('q');
+var userApi = require('./userApi');
+
+var users = [];
 
 var ghToken = null;
 if (fs.existsSync('./parameters.json')) {
     var parameters = JSON.parse(fs.readFileSync('./parameters.json', 'utf8'));
     ghToken = parameters.gh_token || null;
-}
-
-if (fs.existsSync('./users.json')) {
-    var users = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
 }
 
 var isWhitelisted = function(issue) {
@@ -48,6 +47,10 @@ var filterIssues = function (issues) {
     var promises = [];
     var goodIssues = [];
 
+    userApi.getGitNames().done(function (usernames) {
+        users = usernames;
+    });
+
     _.each(issues, function (issue) {
         promises.push(isWhitelisted(issue).then(function (whitelisted) {
             if (!whitelisted){
@@ -57,8 +60,6 @@ var filterIssues = function (issues) {
     });
 
     Q.all(promises).then(function() {
-        console.log('promises done');
-        console.log(arguments);
         deferred.resolve(goodIssues);
     });
 

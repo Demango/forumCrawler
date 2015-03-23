@@ -29,7 +29,6 @@ app.controller('ForumController', function($http) {
     };
 
     this.loadTopics = function() {
-        self.loadingTopics = true;
         $http.get('/topics').then(function(res) {
             self.topics = res.data;
             self.loadingTopics = false;
@@ -37,9 +36,10 @@ app.controller('ForumController', function($http) {
     };
 
     this.clearCache = function() {
+        self.loadingTopics = true;
+        self.topics = [];
         $http.get('/topics/clear-cache').then(function() {
             self.loadTopics();
-            self.topics = [];
         });
     };
 });
