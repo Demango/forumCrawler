@@ -77,7 +77,7 @@ exports.updateUser = function(user, cb) {
 
 
 exports.getUsers = function(cb) {
-    User.find({}).sort('position').exec(
+    User.find({}).exec(
         function(err, setUsers) {
             if (err){
                 console.error(err);
