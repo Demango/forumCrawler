@@ -75,7 +75,6 @@ exports.updateUser = function(user, cb) {
     cb();
 };
 
-
 exports.getUsers = function(cb) {
     User.find({}).exec(
         function(err, setUsers) {
@@ -86,21 +85,20 @@ exports.getUsers = function(cb) {
                 console.log('No users found');
             }
             users = setUsers;
+            cb(users);
         }
     );
-
-    cb(users);
 };
 
 exports.getForumNames = function () {
     var deferred = Q.defer();
     var forumNames = [];
 
-    SetUser.find({}, 'forum', function(err, users) {
+    SetUser.find({}, 'forum', function(err, usernames) {
         if (err) {
             console.error(err);
         }
-        users.forEach(function(user){
+        usernames.forEach(function(user){
             if (user.forum){
                 forumNames.push(user.forum);
             }
@@ -113,12 +111,18 @@ exports.getForumNames = function () {
 
 exports.getGitNames = function () {
     var deferred = Q.defer();
+    var gitNames = [];
 
-    SetUser.find({}, 'git', function(err, users) {
+    SetUser.find({}, 'git', function(err, usernames) {
         if (err) {
             console.error(err);
         }
-        deferred.resolve(users);
+        usernames.forEach(function(user){
+            if (user.git){
+                gitNames.push(user.git);
+            }
+        });
+        deferred.resolve(gitNames);
     });
 
     return deferred.promise;

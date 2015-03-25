@@ -56,17 +56,17 @@ app.controller('IssueController', function($http) {
 
     this.globalIssueCount = function(){
         var count = 0;
-        self.issuesData.forEach(function(repo){
+        self.issuesData.forEach(function(repo) {
             count += repo.issues.length;
         });
         return count;
     };
 
     this.toggleActive = function(tab) {
-        if (self.activeTab === tab){
+        if (self.activeTab === tab) {
             self.activeTab = null;
         }
-        else{self.activeTab = tab;}
+        else{ self.activeTab = tab; }
     };
 
     this.clearCache = function() {
@@ -79,12 +79,7 @@ app.controller('IssueController', function($http) {
     this.loadIssues = function() {
         self.loadingIssues = true;
         $http.get('/issues').then(function(res) {
-            var issuesData = _.map(res.data, function(repoData) {
-                return {
-                    repo: repoData.repo,
-                    issues: repoData.issues
-                };
-            });
+            var issuesData = res.data;
 
             self.issuesData = _.filter(issuesData, function(item) {
                 return item.issues.length > 0;

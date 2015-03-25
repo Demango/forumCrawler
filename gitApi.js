@@ -9,6 +9,8 @@ var util = require('util');
 var _ = require('underscore');
 var Q = require('q');
 var userApi = require('./userApi');
+var Repository = require('./models/repository');
+var Issue = require('./models/issue');
 
 var users = [];
 
@@ -26,17 +28,17 @@ var isWhitelisted = function(issue) {
     }
 
     if (issue.comments) {
-        if (_.where(users, {git: issue.user.login})[0] !== undefined){
-            deferred.resolve(_.where(users, {git: issue.user.login})[0] !== undefined);
+        if (_.contains(users, issue.user.login)){
+            deferred.resolve(_.contains(users, issue.user.login));
         }
         else{
             downloadJSON(issue.comments_url, function(data){
-                deferred.resolve(_.where(users, {git: data[data.length-1].user.login})[0] !== undefined);
+                deferred.resolve(_.contains(users, data[data.length-1].user.login));
             });
         }
 
     } else {
-        deferred.resolve(_.where(users, {git: issue.user.login})[0] !== undefined);
+        deferred.resolve(_.contains(users, issue.user.login));
     }
 
     return deferred.promise;
@@ -47,24 +49,22 @@ var filterIssues = function (issues) {
     var promises = [];
     var goodIssues = [];
 
-    userApi.getGitNames().done(function (usernames) {
-        users = usernames;
-    });
-
-    _.each(issues, function (issue) {
-        promises.push(isWhitelisted(issue).then(function (whitelisted) {
-            if (!whitelisted){
-                goodIssues.push(issue);
-            }
-        }));
-    });
-
-    Q.all(promises).then(function() {
-        deferred.resolve(goodIssues);
-    });
+    userApi.getGitNames()
+        .then(function (usernames) {
+            users = usernames;
+            _.each(issues, function (issue) {
+                promises.push(isWhitelisted(issue).then(function (whitelisted) {
+                    if (!whitelisted){
+                        goodIssues.push(issue);
+                    }
+                }));
+            });
+            Q.all(promises).then(function() {
+                deferred.resolve(goodIssues);
+            });
+        });
 
     return deferred.promise;
-
 };
 
 function clearCache() {
@@ -107,54 +107,148 @@ var downloadRepositories = function(cb) {
     console.log('Loading repositories...');
     downloadJSON('/orgs/akeneo/repos', function(repos) {
         if (util.isArray(repos)) {
-            cb(repos);
+            async.eachSeries(
+                repos,
+                updateRepository,
+                function () {
+                    Repository.find({ 'needs_update': true }, function(err, repos) {
+                        if(err){
+                            console.error(err);
+                        }
+                        cb(repos);
+                    });
+                }
+            );
         } else {
             cb([]);
         }
     });
 };
 
-exports.downloadIssues = function(cb) {
-    if (fs.existsSync('/tmp/issues.json')) {
-        console.log('Loading issues from cache file');
-        var cachedIssues = fs.readFileSync('/tmp/issues.json', 'utf-8');
-        issues = JSON.parse(cachedIssues).issues;
-        return cb(issues);
-    }
-
-    var issues = [];
+exports.downloadIssues = function() {
 
     downloadRepositories(function(repos) {
-        console.log('starting issue download from ' + repos.length + ' repositories');
-
         async.eachSeries(repos, function(repo, callback) {
             console.log('Downloading issues from', repo.full_name);
             downloadJSON('/repos/akeneo/' + repo.name + '/issues', function(data) {
                 filterIssues(data)
-                    .then(function(data){
-                        issues.push({
-                            repo: repo,
-                            issues: data
-                        });
+                    .then(function(result){
+                        return(updateIssues(repo.full_name, result, function(){
+                            markRepositoryUpdated(repo.full_name);
+                            callback();
+                        }));
                     })
                     .catch(function (error) {
                         console.error(error);
-                    })
-                    .done();
-                callback();
+                    });
             });
-        }, function() {
-            if (repos.length) {
-                fs.writeFile("/tmp/issues.json", JSON.stringify({ "issues": issues }), function(err) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log("issues saved to file!");
-                    }
-                });
-            }
+        });
+    });
+};
 
+exports.getIssues = function(cb) {
+    var issues = [];
+    Repository.find(function(err, repos){
+        if (err) {
+            console.error(err);
+        }
+        async.eachSeries(repos, function(repo, callback){
+            Issue.find({'repository': repo._id})
+                .populate('repository')
+                .lean()
+                .exec(function(err, issueData) {
+                    if (err) {
+                        console.error(err);
+                    }
+                    issues.push({
+                        'repository': repo,
+                        'issues': issueData
+                    });
+                    callback();
+                });
+        }, function() {
             cb(issues);
         });
     });
 };
+
+var updateRepository = function(repoData, callback) {
+    Repository.findOne({ 'full_name': repoData.full_name }, function(err, repo) {
+        if (!repo) {
+            repo = new Repository();
+        }
+        if (repo.open_issues === repoData.open_issues &&
+            !repo.needs_update
+        ) {
+            repo.needs_update = false;
+        } else {
+            repo.needs_update = true;
+        }
+
+        repo.name = repoData.name;
+        repo.full_name = repoData.full_name;
+        repo.open_issues = repoData.open_issues;
+
+        repo.save(function(err) {
+            if (err){
+                console.error('Error in Saving repository: '+err);
+            }
+            console.log('Repository Saving succesful');
+            callback();
+        });
+    });
+};
+
+var updateIssues = function (repoFullName, issues, callback) {
+    async.eachSeries(issues, function(issueData, cb) {
+        Issue.findOne({ 'html_url': issueData.html_url }, function(err, issue) {
+            if (err) {
+                console.error(err);
+            }
+            if (!issue) {
+                issue = new Issue();
+            }
+
+            issue.html_url = issueData.html_url;
+            issue.title = issueData.title;
+            issue.author = issueData.user.login;
+            issue.updated_at = issueData.updated_at;
+            Repository.findOne({ 'full_name': repoFullName }, function(err, repo){
+                if (err) {
+                    console.error(err);
+                }
+                issue.repository = repo._id;
+                issue.save(function(err) {
+                    if (err){
+                        console.error('Error in Saving issue: '+err);
+                    }
+                    console.log('Issue Saving succesful');
+                    cb();
+                });
+            });
+
+        });
+    }, function(){
+        callback();
+    });
+};
+
+function markRepositoryUpdated (repoFullName){
+    var deferred = Q.defer();
+
+    Repository.findOne({ 'full_name' :  repoFullName },function(err, repo) {
+        if (err) {
+            console.error(err);
+        }
+
+        repo.needs_update = false;
+        repo.save(function(err) {
+            if (err){
+                console.error('Error in Saving repository: '+err);
+            }
+            deferred.resolve();
+        });
+    });
+
+    return deferred.promise;
+}

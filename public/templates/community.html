@@ -37,15 +37,15 @@
                     <div class="log-window forum" style="width: 450px">
                         <button  ng-show="app.config.signedIn" ng-click="issue.clearCache()" class="btn btn-default">Clear cache</button>
                         <div class="panel panel-default log-window git" style="width: 450px" ng-repeat="repoData in issue.issuesData">
-                            <a ng-click="issue.toggleActive(repoData.repo.name)" class="list-group-item">{{ repoData.repo.name }}
+                            <a ng-click="issue.toggleActive(repoData.repository.name)" class="list-group-item">{{ repoData.repository.name }}
                                 <span class="badge">{{ repoData.issues.length }}</span>
                             </a>
-                            <section ng-show="repoData.repo.name == issue.activeTab">
+                            <section ng-show="repoData.repository.name == issue.activeTab">
                                 <div class="panel-body">
                                     <div ng-repeat="issue in repoData.issues">
                                         <a href="{{ issue.html_url }}" target="_blank" class="truncate">{{ issue.title }}</a>
                                         <p>{{ issue.updated_at|date: 'medium'  }}</p>
-                                        <p>{{ issue.user.login }}</p>
+                                        <p>{{ issue.author }}</p>
                                         <div class="line"></div>
                                     </div>
                                 </div>

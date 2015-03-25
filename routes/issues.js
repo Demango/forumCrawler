@@ -5,14 +5,14 @@ var gitApi = require('./../gitApi');
 module.exports = function (app) {
 
     app.get('/issues', function(req, res) {
-        gitApi.downloadIssues(function(issues) {
+        gitApi.getIssues(function(issues) {
             res.json(issues);
         });
     });
 
     app.get('/issues/clear-cache', function(req, res) {
         if (req.user){
-            gitApi.clearCache();
+            gitApi.downloadIssues();
             res.send('Done');
         } else { res.send(); }
     });
