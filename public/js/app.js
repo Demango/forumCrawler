@@ -139,16 +139,6 @@ app.controller('TestController', function($http) {
         });
     };
 
-    this.redCount = function(tests) {
-    var count = 0;
-    tests.forEach(function(test){
-        if(/^(yellow|red)/.test(test.color)){
-            count++;
-        }
-    });
-    return count;
-    };
-
     this.globalRedCount = function(){
         var count = 0;
         this.loadTests(function(){
@@ -214,6 +204,7 @@ app.controller('AppController', function($http) {
 
     this.config = {};
     this.location = null;
+    this.activeTab = null;
 
     var self = this;
 
@@ -223,6 +214,12 @@ app.controller('AppController', function($http) {
         });
     };
 
+    this.toggleActive = function(tab) {
+        if (self.activeTab === tab){
+            self.activeTab = null;
+        }
+        else{self.activeTab = tab;}
+    };
 });
 
 app.controller('LoginController', function($http, $location) {
@@ -257,8 +254,11 @@ app.config(function($routeProvider) {
         when('/', {
             templateUrl: 'templates/index.html'
         }).
-        when('/community', {
-            templateUrl: 'templates/community.html'
+        when('/issues', {
+            templateUrl: 'templates/issues.html'
+        }).
+        when('/topics', {
+            templateUrl: 'templates/topics.html'
         }).
         when('/tests', {
             templateUrl: 'templates/tests.html'

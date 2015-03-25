@@ -3,13 +3,38 @@
     <a ng-click="loginCtrl.signOut(); app.loadConfig()" ng-controller="LoginController as loginCtrl" style="float: right" ng-if="app.config.signedIn">Sign out</a>
     <div class="container-fluid">
         <div class="row">
-            <div class="btn-group" role="group">
-                <a href="/#/" class="btn btn-default">Home</a>
-                <a href="/#/community" class="btn btn-default">Community</a>
-                <a href="/#/tests" class="btn btn-default" ng-show="app.config.showTests && app.config.signedIn">Tests</a>
-                <a href="/#/users" class="btn btn-default" ng-show="app.config.signedIn">Users</a>
+            <div role="tabpanel">
+                <ul class="nav nav-tabs nav-stacked col-md-2" role="tablist">
+                    <li ng-if="app.config.showTests && app.config.signedIn">
+                        <a href="#tests">Tests<span
+                            ng-controller="TestController as testCtrl"
+                            ng-init="testCtrl.globalRedCount()"
+                            class="label label-default pull-right"
+                            ng-class="{ 'label-danger': testCtrl.redCount }"
+                            ng-bind="testCtrl.redCount">
+                            </span>
+                        </a>
+                    </li>
+                    <li ng-controller="ForumController as forumCtrl" ng-init="forumCtrl.loadTopics()">
+                        <a href="#topics">Topics<span
+                            class="label label-default pull-right"
+                            ng-bind="forumCtrl.globalTopicCount()">
+                            </span>
+                        </a>
+                    </li>
+                    <li ng-controller="IssueController as issueCtrl" ng-init="issueCtrl.loadIssues()">
+                        <a href="#issues">Issues<span
+                            class="label label-default pull-right"
+                            ng-bind="issueCtrl.globalIssueCount()">
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#users">Users</a>
+                    </li>
+                </ul>
             </div>
+            <div ng-view></div>
         </div>
     </div>
-    <div ng-view></div>
 </div>

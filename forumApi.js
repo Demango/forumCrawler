@@ -197,8 +197,14 @@ function downloadForums(cb) {
     });
 }
 
-function downloadTopics(callback) {
-    var deferred = Q.defer();
+var refreshPromise = null;
+
+function downloadTopics() {
+    if (refreshPromise) {
+        return refreshPromise.promise;
+    }
+
+    refreshPromise = Q.defer();
     var promises = [];
 
     downloadForums(function() {
@@ -209,14 +215,13 @@ function downloadTopics(callback) {
 
             Q.all(promises).done(function () {
                 console.log('everything up to date');
-                callback();
-                deferred.resolve();
-
+                refreshPromise.resolve();
+                refreshPromise = null;
             });
         });
     });
 
-    return deferred.promise;
+    return refreshPromise.promise;
 }
 
 function downloadTopicPage(url, forum) {

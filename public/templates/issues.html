@@ -1,0 +1,30 @@
+<div class="col-md-6 col-sm-6" ng-controller="IssueController as issue">
+    <section ng-init="issue.loadIssues()">
+        <div class="list-group">
+            <div class="log-window">
+                <button  ng-show="app.config.signedIn" ng-click="issue.clearCache()" class="btn btn-default">Clear cache</button>
+                <div class="panel panel-default log-window" ng-repeat="repoData in issue.issuesData">
+                    <a ng-click="issue.toggleActive(repoData.repository.name)" class="list-group-item">{{ repoData.repository.name }}
+                        <span class="badge">{{ repoData.issues.length }}</span>
+                    </a>
+                    <section ng-show="repoData.repository.name == issue.activeTab">
+                        <div class="panel-body">
+                            <div ng-repeat="issue in repoData.issues">
+                                <a href="{{ issue.html_url }}" target="_blank" class="truncate">{{ issue.title }}</a>
+                                <p>{{ issue.updated_at|date: 'medium'  }}</p>
+                                <p>{{ issue.author }}</p>
+                                <div class="line"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div ng-show="issue.loadingIssues == true">
+                    <div class="panel-body">
+                        Now loading issues
+                        <img src="/img/ajax-loader.gif" alt="Loading">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
