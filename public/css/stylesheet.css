@@ -1,5 +1,5 @@
 .truncate {
-  width: 430px;
+  width: 30em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -8,6 +8,7 @@
 
 .log-window {
     top: 10px;
+    width: 33em;
 }
 
 .line {

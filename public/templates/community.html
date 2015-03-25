@@ -3,9 +3,9 @@
         <div class="col-md-6 col-sm-6" ng-controller="ForumController as forum">
             <section ng-init="forum.loadTopics()">
                 <div class="list-group">
-                    <div class="log-window forum" style="width: 450px">
+                    <div class="log-window">
                         <button ng-show="app.config.signedIn" ng-click="forum.clearCache()" class="btn btn-default">Clear cache</button>
-                        <div class="panel panel-default log-window git" style="width: 450px" ng-repeat="topicsData in forum.topics" ng-show="topicsData.topics.length">
+                        <div class="panel panel-default log-window" ng-repeat="topicsData in forum.topics" ng-show="topicsData.topics.length">
                             <a ng-click="forum.toggleActive(topicsData.forum)" class="list-group-item">{{ topicsData.forum.name }}
                                 <span class="badge">{{ topicsData.topics.length }}</span>
                             </a>
@@ -34,9 +34,9 @@
         <div class="col-md-6 col-sm-6" ng-controller="IssueController as issue">
             <section ng-init="issue.loadIssues()">
                 <div class="list-group">
-                    <div class="log-window forum" style="width: 450px">
+                    <div class="log-window">
                         <button  ng-show="app.config.signedIn" ng-click="issue.clearCache()" class="btn btn-default">Clear cache</button>
-                        <div class="panel panel-default log-window git" style="width: 450px" ng-repeat="repoData in issue.issuesData">
+                        <div class="panel panel-default log-window" ng-repeat="repoData in issue.issuesData">
                             <a ng-click="issue.toggleActive(repoData.repository.name)" class="list-group-item">{{ repoData.repository.name }}
                                 <span class="badge">{{ repoData.issues.length }}</span>
                             </a>
