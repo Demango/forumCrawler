@@ -11,7 +11,7 @@
                     <button ng-show="app.config.signedIn" ng-click="testCtrl.clearCache()" class="btn btn-default">Clear cache</button>
                     <div class="panel panel-default log-window" style="width: 450px" ng-repeat="testData in testCtrl.tests">
                         <a ng-click="testCtrl.toggleActive(testData.view)" class="list-group-item">{{ testData.view.name }}
-                            <span class="label label-default pull-right" ng-class="{ 'label-danger': testCtrl.redCount(testData.tests)}">{{ testCtrl.redCount(testData.tests) }}</span>
+                            <span class="label label-default pull-right" ng-class="{ 'label-danger': testCtrl.redTestCount(testData.tests)}">{{ testCtrl.redTestCount(testData.tests) }}</span>
                         </a>
                         <section ng-show="testData.view == testCtrl.activeTab">
                             <div class="panel-body">

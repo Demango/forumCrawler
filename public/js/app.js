@@ -139,6 +139,16 @@ app.controller('TestController', function($http) {
         });
     };
 
+    this.redTestCount = function(tests) {
+        var count = 0;
+        tests.forEach(function(test){
+            if(/^(yellow|red)/.test(test.color)){
+                count++;
+            }
+        });
+        return count;
+    };
+
     this.globalRedCount = function(){
         var count = 0;
         this.loadTests(function(){
