@@ -2,5 +2,9 @@
     "gh_token": "your github token here"
     "jenkins_url": "your jenkins url here",
     "jenkins_auth": "your jenkins auth here",
-    "sessionKey": "your random string here"
+    "sessionKey": "your random string here",
+
+    //If left empty defaults to port 3000, if any other port is used requires sudo permissions
+    "portToOpen": "the port you wish to open the server on",
+    "allowSigningUp": boolean
 }

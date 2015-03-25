@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="panel" ng-show="app.config.showTests">
+        <div class="panel" ng-if="app.config.showTests && app.config.signedIn">
             <h3 ng-controller="TestController as testCtrl" ng-init="testCtrl.globalRedCount()">Red tests: <span class="label label-default" ng-class="{ 'label-danger': testCtrl.redCount }">{{ testCtrl.redCount }}</span></h3>
         </div>
         <div class="panel" ng-controller="ForumController as forumCtrl" ng-init="forumCtrl.loadTopics()">

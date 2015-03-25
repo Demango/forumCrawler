@@ -8,9 +8,11 @@ module.exports = function (app) {
     }
 
     app.get('/tests', function(req, res) {
-        testApi.downloadTests(function(tests) {
-            res.json(tests);
-        });
+        if (req.user){
+            testApi.downloadTests(function(tests) {
+                res.json(tests);
+            });
+        } else { res.send(); }
     });
 
     app.get('/tests/clear-cache', function(req, res) {
@@ -21,8 +23,10 @@ module.exports = function (app) {
     });
 
     app.get('/tests/:name', function(req, res) {
-        testApi.getTestInfo(req.params.name, function(testInfo) {
-            res.json(testInfo);
-        });
+        if (req.user){
+            testApi.getTestInfo(req.params.name, function(testInfo) {
+                res.json(testInfo);
+            });
+        } else { res.send(); }
     });
 };

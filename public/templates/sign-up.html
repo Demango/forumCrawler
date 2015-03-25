@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid" ng-if="app.config.allowSigningUp">
     <div class="row" ng-controller="LoginController as loginCtrl" style="width: 450px">
         <form ng-submit="loginCtrl.signUp(user)">
             <input type="text" name="username" class="form-control" placeholder="Username" required autofocus ng-model="user.username">
