@@ -9,7 +9,7 @@ module.exports = function (app) {
 
     app.get('/tests', function(req, res) {
         if (req.user){
-            testApi.downloadTests(function(tests) {
+            testApi.getTests(function(tests) {
                 res.json(tests);
             });
         } else { res.send(); }

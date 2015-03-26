@@ -4,33 +4,60 @@
     <div class="container-fluid">
         <div class="row">
             <div role="tabpanel">
-                <ul class="nav nav-tabs nav-stacked col-md-2" role="tablist">
-                    <li ng-if="app.config.showTests && app.config.signedIn">
+                <ul class="nav nav-tabs nav-stacked col-lg-2 col-md-2 col-sm-2 col-xs-2" role="tablist" ng-init="app.loadSummary()">
+                    <li ng-if="app.config.showTests && app.config.signedIn && !app.loading">
                         <a href="#tests">Tests<span
-                            ng-controller="TestController as testCtrl"
-                            ng-init="testCtrl.globalRedCount()"
                             class="label label-default pull-right"
-                            ng-class="{ 'label-danger': testCtrl.redCount }"
-                            ng-bind="testCtrl.redCount">
+                            ng-class="{ 'label-danger': app.summary.tests }"
+                            ng-bind="app.summary.tests">
                             </span>
                         </a>
                     </li>
-                    <li ng-controller="ForumController as forumCtrl" ng-init="forumCtrl.loadTopics()">
+                    <li ng-if="!app.loading">
                         <a href="#topics">Topics<span
                             class="label label-default pull-right"
-                            ng-bind="forumCtrl.globalTopicCount()">
+                            ng-bind="app.summary.topics">
                             </span>
                         </a>
                     </li>
-                    <li ng-controller="IssueController as issueCtrl" ng-init="issueCtrl.loadIssues()">
+                    <li ng-if="!app.loading">
                         <a href="#issues">Issues<span
                             class="label label-default pull-right"
-                            ng-bind="issueCtrl.globalIssueCount()">
+                            ng-bind="app.summary.issues">
                             </span>
                         </a>
                     </li>
+
+                    <li ng-if="app.config.showTests && app.config.signedIn && app.loading">
+                        <a href="#">Tests<span
+                            class="label label-default pull-right"
+                            ng-class="{ 'label-danger': app.summary.tests }"
+                            ng-bind="app.summary.tests">
+                            </span>
+                        </a>
+                    </li>
+                    <li ng-if="app.loading">
+                        <a href="#">Topics<span
+                            class="label label-default pull-right"
+                            ng-bind="app.summary.topics">
+                            </span>
+                        </a>
+                    </li>
+                    <li ng-if="app.loading">
+                        <a href="#">Issues<span
+                            class="label label-default pull-right"
+                            ng-bind="app.summary.issues">
+                            </span>
+                        </a>
+                    </li>
+
                     <li ng-if="app.config.signedIn">
                         <a href="#users">Users</a>
+                    </li>
+                    <li ng-if="app.config.signedIn">
+                        <a href="/"ng-click="app.fullRefresh()">Refresh
+                            <img ng-if="app.loading" src="/img/ajax-loader.gif" alt="Loading">
+                        </a>
                     </li>
                 </ul>
             </div>

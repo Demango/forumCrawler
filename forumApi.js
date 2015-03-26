@@ -290,5 +290,17 @@ function downloadForumTopics(forum) {
     return deferred.promise;
 }
 
+exports.topicCount = function(cb) {
+    userApi.getForumNames().done(function (usernames) {
+        Topic.find({'author': { $nin: usernames }})
+            .exec(function(err, topics) {
+                if(err) {
+                    console.error(err);
+                }
+                cb(topics.length);
+            });
+    });
+};
+
 exports.getTopics = getTopics;
 exports.clearCache = downloadTopics;

@@ -10,6 +10,8 @@ var expressSession = require('express-session');
 var fs = require('fs');
 
 var testApi = require('./testApi');
+var forumApi = require('./forumApi');
+var gitApi = require('./gitApi');
 
 var sessionKey = null;
 var portToOpen = null;
@@ -42,6 +44,20 @@ app.get('/config', function(req, res) {
             'showTests': token,
             'signedIn': req.user ? true : false,
             'allowSigningUp': allowSigningUp
+        });
+    });
+});
+
+app.get('/summary', function(req, res) {
+    testApi.redCount(function(tests) {
+        forumApi.topicCount(function(topics) {
+            gitApi.issueCount(function(issues) {
+                res.json({
+                    'issues': issues,
+                    'topics': topics,
+                    'tests': req.user ? tests : null
+                });
+            });
         });
     });
 });

@@ -1,6 +1,6 @@
 <div>
     <div class="col-md-6" style="width: 450px" ng-controller="LoginController as loginCtrl">
-        <form ng-submit="loginCtrl.login(user); app.loadConfig()">
+        <form ng-submit="loginCtrl.login(user); app.loadConfig(); app.loadSummary()">
             <input type="text" name="username" class="form-control" placeholder="Username" required autofocus ng-model="user.username">
             <input type="password" name="password" placeholder="Password" required ng-model="user.password">
             <input class="btn btn-lg btn-primary" type="submit" value="Sign in">

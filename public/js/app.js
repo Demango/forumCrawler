@@ -5,8 +5,6 @@ var app = angular.module('app', ['ngRoute']);
 app.controller('ForumController', function($http) {
     this.topics = [];
 
-    this.loadingTopics = false;
-
     this.activeTab = null;
 
     this.topicCount = 0;
@@ -31,12 +29,10 @@ app.controller('ForumController', function($http) {
     this.loadTopics = function() {
         $http.get('/topics').then(function(res) {
             self.topics = res.data;
-            self.loadingTopics = false;
         });
     };
 
     this.clearCache = function() {
-        self.loadingTopics = true;
         self.topics = [];
         $http.get('/topics/clear-cache').then(function() {
             self.loadTopics();
@@ -47,8 +43,6 @@ app.controller('ForumController', function($http) {
 app.controller('IssueController', function($http) {
 
     this.issuesData = [];
-
-    this.loadingIssues = false;
 
     this.activeTab = null;
 
@@ -77,14 +71,12 @@ app.controller('IssueController', function($http) {
     };
 
     this.loadIssues = function() {
-        self.loadingIssues = true;
         $http.get('/issues').then(function(res) {
             var issuesData = res.data;
 
             self.issuesData = _.filter(issuesData, function(item) {
                 return item.issues.length > 0;
             });
-            self.loadingIssues = false;
         });
     };
 });
@@ -93,8 +85,6 @@ app.controller('TestController', function($http) {
     this.tests = [];
 
     this.activeTab = null;
-
-    this.loadingTests = false;
 
     this.showGreen = false;
 
@@ -123,10 +113,8 @@ app.controller('TestController', function($http) {
     };
 
     this.loadTests = function(cb) {
-        self.loadingTests = true;
         $http.get('/tests').then(function(res) {
             self.tests = res.data;
-            self.loadingTests = false;
             if (cb) {
                 cb();
             }
@@ -215,6 +203,8 @@ app.controller('AppController', function($http) {
     this.config = {};
     this.location = null;
     this.activeTab = null;
+    this.summary = {};
+    this.loading = false;
 
     var self = this;
 
@@ -224,11 +214,33 @@ app.controller('AppController', function($http) {
         });
     };
 
+    this.loadSummary = function() {
+        $http.get('/summary').then(function(res) {
+            self.summary = res.data;
+            return;
+        });
+    };
+
     this.toggleActive = function(tab) {
         if (self.activeTab === tab){
             self.activeTab = null;
         }
         else{self.activeTab = tab;}
+    };
+
+    this.fullRefresh = function() {
+        this.summary = {};
+        self.loading = true;
+        $http.get('/tests/clear-cache').then(function() {
+            $http.get('/issues/clear-cache').then(function() {
+                $http.get('/topics/clear-cache').then(function() {
+                    self.loadSummary();
+                    self.loading = false;
+                });
+            });
+        });
+
+
     };
 });
 

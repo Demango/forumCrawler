@@ -2,7 +2,6 @@
     <section ng-init="issue.loadIssues()">
         <div class="list-group">
             <div class="log-window">
-                <button  ng-show="app.config.signedIn" ng-click="issue.clearCache()" class="btn btn-default">Clear cache</button>
                 <div class="panel panel-default log-window" ng-repeat="repoData in issue.issuesData">
                     <a ng-click="issue.toggleActive(repoData.repository.name)" class="list-group-item">{{ repoData.repository.name }}
                         <span class="badge">{{ repoData.issues.length }}</span>
@@ -17,12 +16,6 @@
                             </div>
                         </div>
                     </section>
-                </div>
-                <div ng-show="issue.loadingIssues == true">
-                    <div class="panel-body">
-                        Now loading issues
-                        <img src="/img/ajax-loader.gif" alt="Loading">
-                    </div>
                 </div>
             </div>
         </div>

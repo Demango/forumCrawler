@@ -4,6 +4,9 @@ var http = require("http");
 var async = require('async');
 var fs = require('fs');
 
+var View = require('./models/view');
+var Test = require('./models/test');
+
 var jenkinsUrl;
 var jenkinsAuth;
 if (fs.existsSync('./parameters.json')) {
@@ -38,44 +41,60 @@ function download(url, callback) {
 
 var downloadViews = function(cb) {
     console.log('Loading views...');
-    download('/api/json', function(views) {
-        if (views) {
-            cb(views.views);
+    download('/api/json', function(viewsData) {
+        if (viewsData) {
+            updateViews(viewsData.views, function() {
+                cb(viewsData.views);
+            });
         } else {
-            console.log(views.views);
             cb([]);
         }
     });
 };
 
-exports.clearCache = function() {
-  if (fs.existsSync("/tmp/tests.json")) {
-    fs.unlink("/tmp/tests.json");
-    console.log('Cache cleared');
-  }
+var updateViews = function(views, cb) {
+    async.eachSeries(views, function(viewData, callback) {
+        if (/^Main/.test(viewData.name)) {
+            console.log('viewData.url: ' + viewData.url);
+            View.findOne({ 'url': viewData.url }, function(err, view) {
+                if (err) {
+                    console.error(err);
+                }
+                if (!view) {
+                    view = new View();
+                }
+                view.url = viewData.url;
+                view.name = viewData.name;
+
+                view.save(function(err) {
+                    if (err){
+                        console.error('Error in Saving view: '+err);
+                    }
+                    console.log('View Saving succesful');
+                    callback();
+                });
+
+            });
+        } else { callback(); }
+    },function() {
+        cb();
+    });
 };
 
-exports.downloadTests = function(cb) {
-    if (fs.existsSync('/tmp/tests.json')) {
-        console.log('Loading tests from cache file');
-        var cachedTests = fs.readFileSync('/tmp/tests.json', 'utf-8');
-        tests = JSON.parse(cachedTests).tests;
-        return cb(tests);
-    }
-
+var downloadTests = function() {
     var tests = [];
 
     downloadViews(function(views) {
         console.log('starting test download');
 
         async.eachSeries(views, function(view, callback) {
-            if (view.name.substring(0, 4) == "Main")
+            if (/^Main/.test(view.name))
             {
                 console.log('Downloading tests from', view.name);
                 download('/view/' + view.name + '/api/json', function(data) {
                     console.log('downloaded');
                     tests.push({
-                        view: view,
+                        view: view.url,
                         tests: data.jobs
                     });
                     callback();
@@ -86,17 +105,36 @@ exports.downloadTests = function(cb) {
                 callback();
             }
         }, function() {
-            if (views.length) {
-                fs.writeFile("/tmp/tests.json", JSON.stringify({ "tests": tests }), function(err) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log("tests saved to file!");
-                    }
-                });
-            }
+            tests.forEach(function(view){
+                async.eachSeries(view.tests, function(testData, callback) {
+                    Test.findOne({ 'url': testData.url }, function(err, test) {
+                        if (err) {
+                            console.error(err);
+                        }
+                        if (!test) {
+                            test = new Test();
+                        }
+                        test.url = testData.url;
+                        test.name = testData.name;
+                        test.color = testData.color;
 
-            cb(tests);
+                        View.findOne({ 'url': view.view }, function(err,viewData) {
+                            if (err) {
+                                console.error(err);
+                            }
+                            test.view = viewData._id;
+
+                            test.save(function(err) {
+                                if (err){
+                                    console.error('Error in Saving test: '+err);
+                                }
+                                console.log('Test Saving succesful');
+                                callback();
+                            });
+                        });
+                    });
+                });
+            });
         });
     });
 };
@@ -115,6 +153,15 @@ exports.hasToken = function() {
     return token;
 };
 
+exports.redCount = function(cb) {
+    Test.find({color: /^(yellow|red)/}, function(err, tests){
+        if (err) {
+            console.error(err);
+        }
+        cb(tests.length);
+    });
+};
+
 exports.getTestInfo = function(name, cb) {
     var url = '/job/' + name +'/api/json';
 
@@ -127,3 +174,32 @@ exports.getTestInfo = function(name, cb) {
         }
     });
 };
+
+exports.getTests = function(cb) {
+    var tests = [];
+    View.find(function(err, views){
+        if (err) {
+            console.error(err);
+        }
+        async.eachSeries(views, function(view, callback){
+            Test.find({'view': view._id})
+                .populate('view')
+                .lean()
+                .exec(function(err, testData) {
+                    if (err) {
+                        console.error(err);
+                    }
+                    tests.push({
+                        'view': view,
+                        'tests': testData
+                    });
+                    callback();
+                });
+        }, function() {
+            cb(tests);
+        });
+    });
+};
+
+exports.downloadTests = downloadTests;
+exports.clearCache = downloadTests;

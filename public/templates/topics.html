@@ -1,30 +1,23 @@
 <div class="col-md-6 col-sm-6" ng-controller="ForumController as forum">
-            <section ng-init="forum.loadTopics()">
-                <div class="list-group">
-                    <div class="log-window">
-                        <button ng-show="app.config.signedIn" ng-click="forum.clearCache()" class="btn btn-default">Clear cache</button>
-                        <div class="panel panel-default log-window" ng-repeat="topicsData in forum.topics" ng-show="topicsData.topics.length">
-                            <a ng-click="forum.toggleActive(topicsData.forum)" class="list-group-item">{{ topicsData.forum.name }}
-                                <span class="badge">{{ topicsData.topics.length }}</span>
-                            </a>
-                            <section ng-show="topicsData.forum == forum.activeTab">
-                                <div class="panel-body">
-                                    <div ng-repeat="topic in topicsData.topics">
-                                        <a href="{{ topic.url }}" target="_blank" class="truncate">{{ topic.title }}</a>
-                                        <p>{{ topic.age|date: 'medium' }}</p>
-                                        <p>{{ topic.author }}</p>
-                                        <div class="line"></div>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                        <div ng-show="forum.loadingTopics == true">
-                            <div class="panel-body">
-                                Now loading topics
-                                <img src="/img/ajax-loader.gif" alt="Loading">
+    <section ng-init="forum.loadTopics()">
+        <div class="list-group">
+            <div class="log-window">
+                <div class="panel panel-default log-window" ng-repeat="topicsData in forum.topics" ng-show="topicsData.topics.length">
+                    <a ng-click="forum.toggleActive(topicsData.forum)" class="list-group-item">{{ topicsData.forum.name }}
+                        <span class="badge">{{ topicsData.topics.length }}</span>
+                    </a>
+                    <section ng-show="topicsData.forum == forum.activeTab">
+                        <div class="panel-body">
+                            <div ng-repeat="topic in topicsData.topics">
+                                <a href="{{ topic.url }}" target="_blank" class="truncate">{{ topic.title }}</a>
+                                <p>{{ topic.age|date: 'medium' }}</p>
+                                <p>{{ topic.author }}</p>
+                                <div class="line"></div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
-            </section>
+            </div>
         </div>
+    </section>
+</div>

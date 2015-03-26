@@ -8,7 +8,6 @@
         <section ng-init="testCtrl.loadTests()">
             <div class="list-group">
                 <div class="log-window" style="width: 450px">
-                    <button ng-show="app.config.signedIn" ng-click="testCtrl.clearCache()" class="btn btn-default">Clear cache</button>
                     <div class="panel panel-default log-window" style="width: 450px" ng-repeat="testData in testCtrl.tests">
                         <a ng-click="testCtrl.toggleActive(testData.view)" class="list-group-item">{{ testData.view.name }}
                             <span class="label label-default pull-right" ng-class="{ 'label-danger': testCtrl.redTestCount(testData.tests)}">{{ testCtrl.redTestCount(testData.tests) }}</span>
@@ -33,12 +32,6 @@
                                 </div>
                             </div>
                         </section>
-                    </div>
-                    <div ng-show="testCtrl.loadingTests == true">
-                        <div class="panel-body">
-                            Now loading tests
-                            <img src="/img/ajax-loader.gif" alt="Loading">
-                        </div>
                     </div>
                 </div>
             </div>

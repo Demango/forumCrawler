@@ -172,6 +172,12 @@ exports.getIssues = function(cb) {
     });
 };
 
+exports.issueCount = function(cb) {
+    Issue.find(function(err, issues) {
+        cb(issues.length);
+    });
+};
+
 var updateRepository = function(repoData, callback) {
     Repository.findOne({ 'full_name': repoData.full_name }, function(err, repo) {
         if (!repo) {
