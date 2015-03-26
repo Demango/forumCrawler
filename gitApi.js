@@ -70,7 +70,6 @@ var filterIssues = function (issues) {
 function clearCache() {
     if (fs.existsSync("/tmp/issues.json")) {
         fs.unlink("/tmp/issues.json");
-        console.log('Cache cleared');
     }
 }
 exports.clearCache = clearCache;
@@ -98,13 +97,12 @@ function downloadJSON(url, callback) {
             });
         }
     ).on("error", function() {
-        console.log('request error');
+        console.error('request error');
         callback(null);
     });
 }
 
 var downloadRepositories = function(cb) {
-    console.log('Loading repositories...');
     downloadJSON('/orgs/akeneo/repos', function(repos) {
         if (util.isArray(repos)) {
             async.eachSeries(
@@ -129,7 +127,6 @@ exports.downloadIssues = function() {
 
     downloadRepositories(function(repos) {
         async.eachSeries(repos, function(repo, callback) {
-            console.log('Downloading issues from', repo.full_name);
             downloadJSON('/repos/akeneo/' + repo.name + '/issues', function(data) {
                 filterIssues(data)
                     .then(function(result){
@@ -191,15 +188,12 @@ var updateRepository = function(repoData, callback) {
             repo.needs_update = true;
         }
 
-        repo.name = repoData.name;
-        repo.full_name = repoData.full_name;
-        repo.open_issues = repoData.open_issues;
+        repo = _.defaults(repo, repoData);
 
         repo.save(function(err) {
             if (err){
                 console.error('Error in Saving repository: '+err);
             }
-            console.log('Repository Saving succesful');
             callback();
         });
     });
@@ -215,10 +209,10 @@ var updateIssues = function (repoFullName, issues, callback) {
                 issue = new Issue();
             }
 
-            issue.html_url = issueData.html_url;
-            issue.title = issueData.title;
             issue.author = issueData.user.login;
-            issue.updated_at = issueData.updated_at;
+
+            issue = _.defaults(issue, issueData);
+
             Repository.findOne({ 'full_name': repoFullName }, function(err, repo){
                 if (err) {
                     console.error(err);
@@ -228,7 +222,6 @@ var updateIssues = function (repoFullName, issues, callback) {
                     if (err){
                         console.error('Error in Saving issue: '+err);
                     }
-                    console.log('Issue Saving succesful');
                     cb();
                 });
             });
@@ -248,6 +241,7 @@ function markRepositoryUpdated (repoFullName){
         }
 
         repo.needs_update = false;
+
         repo.save(function(err) {
             if (err){
                 console.error('Error in Saving repository: '+err);

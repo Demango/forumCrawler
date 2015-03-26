@@ -7,6 +7,7 @@ var Q = require('q');
 var Forum = require('./models/forum');
 var Topic = require('./models/topic');
 var userApi = require('./userApi');
+var _ = require('underscore');
 
 var forumUrl = 'http://www.akeneo.com/forums/';
 
@@ -63,7 +64,6 @@ function updateForum (forumData, callback) {
     Forum.findOne({ 'url' :  forumData.url },function(err, forum) {
         if (!forum) {
             forum = new Forum();
-            console.log('making new entry');
         }
 
         if (forum.topic_count === forumData.topic_count &&
@@ -75,17 +75,12 @@ function updateForum (forumData, callback) {
             forum.needs_update = true;
         }
 
-        forum.url = forumData.url;
-        forum.name = forumData.name;
-        forum.topic_count = forumData.topic_count;
-        forum.reply_count = forumData.reply_count;
-        forum.freshness = forumData.freshness;
+        forum = _.defaults(forum, forumData);
 
         forum.save(function(err) {
             if (err){
                 console.error('Error in Saving forum: '+err);
             }
-            console.log('Forum Saving succesful');
             callback();
         });
     });
@@ -104,7 +99,6 @@ function markForumUpdated (forumData){
             if (err){
                 console.error('Error in Saving forum: '+err);
             }
-            console.log('Forum Saving succesful');
             deferred.resolve();
         });
     });
@@ -118,20 +112,15 @@ function updateTopic(topicData) {
     Topic.findOne({ 'url' :  topicData.url },function(err, topic) {
         if (!topic) {
             topic = new Topic();
-            console.log('making new entry');
         }
 
-        topic.url = topicData.url;
-        topic.title = topicData.title;
-        topic.author = topicData.author;
-        topic.age = topicData.age;
+        topic = _.defaults(topic, topicData);
         topic.forum = topicData.forum._id;
 
         topic.save(function(err) {
             if (err){
                 console.error('Error in Saving topic: '+err);
             }
-            console.log('Topic Saving succesful');
             deferred.resolve();
         });
     });
@@ -186,12 +175,10 @@ function downloadForums(cb) {
                 forums,
                 updateForum,
                 function () {
-                    console.log('forums up to date');
                     cb();
                 }
             );
         } else {
-            console.log('nothing found');
             cb();
         }
     });
@@ -214,7 +201,6 @@ function downloadTopics() {
             });
 
             Q.all(promises).done(function () {
-                console.log('everything up to date');
                 refreshPromise.resolve();
                 refreshPromise = null;
             });
@@ -232,14 +218,10 @@ function downloadTopicPage(url, forum) {
         var $ = cheerio.load(data);
         $("ul.topic:not(.super-sticky) a.bbp-topic-permalink").each(function(i, e) {
             var resolved = $(e).siblings('span.resolved').length;
-            // console.log('resolved:', resolved);
             var title = $(e).attr("title");
-            // console.log('title:', title);
             var author = $(e).parent().siblings('.bbp-topic-freshness').find('.bbp-topic-freshness-author .bbp-author-name').text();
-            // console.log('author:', author);
             var age = $(e).parent().siblings('.bbp-topic-freshness').find('a').text().replace(/ago.*$/i, "");
             age = parseAge(age);
-            // console.log('age:', age);
             if (!resolved) {
                 topics.push({
                     url: $(e).attr("href"),

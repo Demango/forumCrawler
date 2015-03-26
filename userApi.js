@@ -13,7 +13,7 @@ function saveUsers(){
     User.remove({}, function(err) {
         if(err){
             console.error(err);
-        } else { console.log('collection removed'); }
+        }
     });
 
     users.forEach(function(user){
@@ -31,10 +31,9 @@ function saveUsers(){
 
         newUser.save(function(err) {
             if (err){
-                console.log('Error in Saving user: '+err);
+                console.error('Error in Saving user: '+err);
                 throw err;
             }
-            console.log('User Saving succesful');
         });
     });
 }
@@ -80,9 +79,6 @@ exports.getUsers = function(cb) {
         function(err, setUsers) {
             if (err){
                 console.error(err);
-            }
-            if (!setUsers){
-                console.log('No users found');
             }
             users = setUsers;
             cb(users);

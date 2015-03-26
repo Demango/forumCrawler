@@ -14,11 +14,9 @@ module.exports = function(passport){
                     if (err)
                         return done(err);
                     if (!user){
-                        console.log('User Not Found with username '+username);
                         return done(null, false);
                     }
                     if (!isValidPassword(user, password)){
-                        console.log('Invalid Password');
                         return done(null, false);
                     }
                     return done(null, user);

@@ -3,6 +3,7 @@
 var http = require("http");
 var async = require('async');
 var fs = require('fs');
+var _ = require('underscore');
 
 var View = require('./models/view');
 var Test = require('./models/test');
@@ -28,19 +29,16 @@ function download(url, callback) {
                 data += chunk;
             });
             res.on("end", function() {
-                console.log(url);
                 callback(JSON.parse(data));
             });
         }
     ).on("error", function(e) {
-        console.log(e);
-        console.log('request error');
+        console.error('request error' + e);
         callback(null);
     });
 }
 
 var downloadViews = function(cb) {
-    console.log('Loading views...');
     download('/api/json', function(viewsData) {
         if (viewsData) {
             updateViews(viewsData.views, function() {
@@ -55,7 +53,6 @@ var downloadViews = function(cb) {
 var updateViews = function(views, cb) {
     async.eachSeries(views, function(viewData, callback) {
         if (/^Main/.test(viewData.name)) {
-            console.log('viewData.url: ' + viewData.url);
             View.findOne({ 'url': viewData.url }, function(err, view) {
                 if (err) {
                     console.error(err);
@@ -63,14 +60,13 @@ var updateViews = function(views, cb) {
                 if (!view) {
                     view = new View();
                 }
-                view.url = viewData.url;
-                view.name = viewData.name;
+
+                view = _.defaults(view, viewData);
 
                 view.save(function(err) {
                     if (err){
                         console.error('Error in Saving view: '+err);
                     }
-                    console.log('View Saving succesful');
                     callback();
                 });
 
@@ -85,21 +81,17 @@ var downloadTests = function() {
     var tests = [];
 
     downloadViews(function(views) {
-        console.log('starting test download');
-
         async.eachSeries(views, function(view, callback) {
             if (/^Main/.test(view.name))
             {
-                console.log('Downloading tests from', view.name);
                 download('/view/' + view.name + '/api/json', function(data) {
-                    console.log('downloaded');
                     tests.push({
                         view: view.url,
                         tests: data.jobs
                     });
                     callback();
                 }, function(err) {
-                    console.log(err);
+                    console.error(err);
                 });
             } else {
                 callback();
@@ -114,9 +106,8 @@ var downloadTests = function() {
                         if (!test) {
                             test = new Test();
                         }
-                        test.url = testData.url;
-                        test.name = testData.name;
-                        test.color = testData.color;
+
+                        test = _.defaults(test, testData);
 
                         View.findOne({ 'url': view.view }, function(err,viewData) {
                             if (err) {
@@ -128,7 +119,6 @@ var downloadTests = function() {
                                 if (err){
                                     console.error('Error in Saving test: '+err);
                                 }
-                                console.log('Test Saving succesful');
                                 callback();
                             });
                         });
@@ -169,7 +159,6 @@ exports.getTestInfo = function(name, cb) {
         if (info) {
             cb(info);
         } else {
-            console.log(info);
             cb([]);
         }
     });

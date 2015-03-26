@@ -248,7 +248,6 @@ app.controller('LoginController', function($http, $location) {
 
     this.login = function(user) {
         $http.post('/login', user).then(function(response) {
-            console.log(response);
             window.response = response;
             if (response.status == 200) {
                 $location.path('/');
@@ -258,7 +257,6 @@ app.controller('LoginController', function($http, $location) {
 
     this.signUp = function(user) {
         $http.post('/signup', user).then(function(response) {
-            console.log(response);
             window.response = response;
             if (response.status == 200) {
                 $location.path('/');

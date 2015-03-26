@@ -10,7 +10,7 @@ module.exports = function(app, allowSigningUp){
 
     if (allowSigningUp){
         app.post('/signup', passport.authenticate('signup'), function (req, res) {
-                res.send(req.user);
+            res.send(req.user);
         });
     }
 
