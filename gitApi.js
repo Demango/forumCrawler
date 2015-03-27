@@ -123,7 +123,7 @@ var downloadRepositories = function(cb) {
     });
 };
 
-exports.downloadIssues = function() {
+exports.downloadIssues = function(cb) {
 
     downloadRepositories(function(repos) {
         async.eachSeries(repos, function(repo, callback) {
@@ -139,6 +139,8 @@ exports.downloadIssues = function() {
                         console.error(error);
                     });
             });
+        },function() {
+            cb();
         });
     });
 };
@@ -188,7 +190,7 @@ var updateRepository = function(repoData, callback) {
             repo.needs_update = true;
         }
 
-        repo = _.defaults(repo, repoData);
+        repo = _.extend(repo, repoData);
 
         repo.save(function(err) {
             if (err){
@@ -211,7 +213,7 @@ var updateIssues = function (repoFullName, issues, callback) {
 
             issue.author = issueData.user.login;
 
-            issue = _.defaults(issue, issueData);
+            issue = _.extend(issue, issueData);
 
             Repository.findOne({ 'full_name': repoFullName }, function(err, repo){
                 if (err) {

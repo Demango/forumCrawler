@@ -9,7 +9,7 @@ module.exports = function (app) {
             userApi.getUsers(function(users) {
                 res.json(users);
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
     app.post('/users', function(req, res){
@@ -17,7 +17,7 @@ module.exports = function (app) {
             userApi.createUser(req.body, function(){
                 res.send('Done');
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
     app.post('/users/delete', function(req, res){
@@ -25,7 +25,7 @@ module.exports = function (app) {
             userApi.deleteUser(req.body.username, function(){
                 res.send('Done');
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
     app.post('/users/update/', function(req, res){
@@ -33,7 +33,7 @@ module.exports = function (app) {
             userApi.updateUser(req.body, function(){
                 res.send('Done');
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
     app.post('/users/update_position', function(req, res){
@@ -41,6 +41,6 @@ module.exports = function (app) {
             userApi.updateUserPosition(req.body, function(){
                 res.send('Done');
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 };

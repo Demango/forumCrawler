@@ -61,21 +61,21 @@ function parseAge(age) {
 }
 
 function updateForum (forumData, callback) {
+
+
     Forum.findOne({ 'url' :  forumData.url },function(err, forum) {
         if (!forum) {
             forum = new Forum();
         }
 
-        if (forum.topic_count === forumData.topic_count &&
-            forum.reply_count === forumData.reply_count &&
+        if (forum.topic_count != forumData.topic_count &&
+            forum.reply_count != forumData.reply_count &&
             !forum.needs_update
         ) {
-            forum.needs_update = false;
-        } else {
             forum.needs_update = true;
         }
 
-        forum = _.defaults(forum, forumData);
+        forum = _.extend(forum, forumData);
 
         forum.save(function(err) {
             if (err){
@@ -114,7 +114,7 @@ function updateTopic(topicData) {
             topic = new Topic();
         }
 
-        topic = _.defaults(topic, topicData);
+        topic = _.extend(topic, topicData);
         topic.forum = topicData.forum._id;
 
         topic.save(function(err) {
@@ -186,7 +186,7 @@ function downloadForums(cb) {
 
 var refreshPromise = null;
 
-function downloadTopics() {
+function downloadTopics(cb) {
     if (refreshPromise) {
         return refreshPromise.promise;
     }
@@ -203,6 +203,7 @@ function downloadTopics() {
             Q.all(promises).done(function () {
                 refreshPromise.resolve();
                 refreshPromise = null;
+                cb();
             });
         });
     });

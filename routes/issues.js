@@ -14,7 +14,7 @@ module.exports = function (app) {
         if (req.user){
             gitApi.downloadIssues();
             res.send('Done');
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
 };

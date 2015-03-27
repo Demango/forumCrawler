@@ -12,14 +12,14 @@ module.exports = function (app) {
             testApi.getTests(function(tests) {
                 res.json(tests);
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
     app.get('/tests/clear-cache', function(req, res) {
         if (req.user){
             testApi.clearCache();
             res.send('Done');
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
     app.get('/tests/:name', function(req, res) {
@@ -27,6 +27,6 @@ module.exports = function (app) {
             testApi.getTestInfo(req.params.name, function(testInfo) {
                 res.json(testInfo);
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 };

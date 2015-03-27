@@ -61,7 +61,7 @@ var updateViews = function(views, cb) {
                     view = new View();
                 }
 
-                view = _.defaults(view, viewData);
+                view = _.extend(view, viewData);
 
                 view.save(function(err) {
                     if (err){
@@ -77,7 +77,7 @@ var updateViews = function(views, cb) {
     });
 };
 
-var downloadTests = function() {
+var downloadTests = function(cb) {
     var tests = [];
 
     downloadViews(function(views) {
@@ -107,7 +107,7 @@ var downloadTests = function() {
                             test = new Test();
                         }
 
-                        test = _.defaults(test, testData);
+                        test = _.extend(test, testData);
 
                         View.findOne({ 'url': view.view }, function(err,viewData) {
                             if (err) {
@@ -123,6 +123,8 @@ var downloadTests = function() {
                             });
                         });
                     });
+                },function() {
+                    cb();
                 });
             });
         });

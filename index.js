@@ -62,6 +62,19 @@ app.get('/summary', function(req, res) {
     });
 });
 
+app.get('/full-refresh', function(req, res) {
+    if (req.user){
+        gitApi.downloadIssues(function() {
+            testApi.clearCache(function() {
+                forumApi.clearCache(function() {
+                    res.send('Done');
+                });
+            });
+        });
+    } else { res.sendStatus(401); }
+
+});
+
 app.get('/', function(req, res) {
     res.render('index', {title:"Dashboard"});
 });
@@ -70,6 +83,7 @@ require('./routes/tests')(app);
 require('./routes/users')(app);
 require('./routes/issues')(app);
 require('./routes/topics')(app);
+require('./routes/data')(app);
 
 var initPassport = require('./passport/init');
 initPassport(passport);

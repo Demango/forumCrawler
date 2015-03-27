@@ -215,9 +215,12 @@ app.controller('AppController', function($http) {
         });
     };
 
-    this.loadSummary = function() {
+    this.loadSummary = function(param) {
         $http.get('/summary').then(function(res) {
             self.summary = res.data;
+            if (param == 'save') {
+                $http.post('/summary/create-entry', self.summary);
+            }
             return;
         });
     };
@@ -232,13 +235,9 @@ app.controller('AppController', function($http) {
     this.fullRefresh = function() {
         this.summary = {};
         self.loading = true;
-        $http.get('/tests/clear-cache').then(function() {
-            $http.get('/issues/clear-cache').then(function() {
-                $http.get('/topics/clear-cache').then(function() {
-                    self.loadSummary();
-                    self.loading = false;
-                });
-            });
+        $http.get('/full-refresh').then(function() {
+            self.loadSummary('save');
+            self.loading = false;
         });
 
 

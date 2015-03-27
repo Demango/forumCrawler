@@ -15,7 +15,7 @@ module.exports = function (app) {
             forumApi.clearCache().done(function () {
                 res.send('Done');
             });
-        } else { res.send(); }
+        } else { res.sendStatus(401); }
     });
 
 };
