@@ -70,7 +70,7 @@
                     <td ng-hide="user == userCtrl.editingUser">
                         <a ng-click="userCtrl.deleteUser(user)" class="btn btn-default">Delete</a>
                     </td>
-                    <td ng-hide="user == userCtrl.editingUser">
+                    <td ng-hide="user == userCtrl.editingUser || userCtrl.editingUser.name">
                         <a ng-click="userCtrl.selectEdit(user)" class="btn btn-default">Update</a>
                     </td>
 
@@ -100,6 +100,9 @@
                     </td>
                     <td ng-show="user == userCtrl.editingUser">
                         <a ng-click="userCtrl.sendUpdate(user)" class="btn btn-primary">Update</a>
+                    </td>
+                    <td ng-show="userCtrl.editingUser.name && user != userCtrl.editingUser">
+                        <a class="btn btn-default disabled">Update</a>
                     </td>
                 </tr>
             </tbody>

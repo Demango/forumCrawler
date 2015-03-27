@@ -63,7 +63,7 @@ app.get('/summary', function(req, res) {
 });
 
 app.get('/', function(req, res) {
-    res.render('index', {title:"Crawler"});
+    res.render('index', {title:"Dashboard"});
 });
 
 require('./routes/tests')(app);

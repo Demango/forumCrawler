@@ -8,7 +8,7 @@
                     </a>
                     <section ng-show="topicsData.forum == forum.activeTab">
                         <div class="panel-body">
-                            <div ng-repeat="topic in topicsData.topics">
+                            <div ng-repeat="topic in topicsData.topics | orderBy:'age':true">
                                 <a href="{{ topic.url }}" target="_blank" class="truncate">{{ topic.title }}</a>
                                 <p>{{ topic.age|date: 'medium' }}</p>
                                 <p>{{ topic.author }}</p>

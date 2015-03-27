@@ -171,6 +171,7 @@ app.controller('UserController', function($http) {
     this.loadUsers = function() {
         $http.get('/users').then(function(res) {
             self.users = res.data;
+            self.editingUser.name = null;
         });
     };
 
