@@ -5,12 +5,12 @@ var User = require('../models/user');
 var bCrypt = require('bcrypt-nodejs');
 
 module.exports = function(passport){
-
     passport.use('signup', new LocalStrategy({
             passReqToCallback : true
         },
         function(req, username, password, done) {
 
+        console.log('here');
             var findOrCreateUser = function(){
                 User.findOne({ 'username' :  username }, function(err, user) {
                     if (err){

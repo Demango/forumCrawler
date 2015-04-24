@@ -177,6 +177,27 @@ exports.issueCount = function(cb) {
     });
 };
 
+exports.markNeedsUpdate = function(repoFullName) {
+    var deferred = Q.defer();
+
+    Repository.findOne({ 'full_name' :  repoFullName },function(err, repo) {
+        if (err) {
+            console.error(err);
+        }
+
+        repo.needs_update = true;
+
+        repo.save(function(err) {
+            if (err){
+                console.error('Error in Saving repository: '+err);
+            }
+            deferred.resolve();
+        });
+    });
+
+    return deferred.promise;
+}
+
 var updateRepository = function(repoData, callback) {
     Repository.findOne({ 'full_name': repoData.full_name }, function(err, repo) {
         if (!repo) {
@@ -203,31 +224,38 @@ var updateRepository = function(repoData, callback) {
 
 var updateIssues = function (repoFullName, issues, callback) {
     async.eachSeries(issues, function(issueData, cb) {
-        Issue.findOne({ 'html_url': issueData.html_url }, function(err, issue) {
+        Repository.findOne({ 'full_name': repoFullName }, function(err, repo){
             if (err) {
                 console.error(err);
             }
-            if (!issue) {
-                issue = new Issue();
-            }
-
-            issue.author = issueData.user.login;
-
-            issue = _.extend(issue, issueData);
-
-            Repository.findOne({ 'full_name': repoFullName }, function(err, repo){
-                if (err) {
-                    console.error(err);
-                }
-                issue.repository = repo._id;
-                issue.save(function(err) {
-                    if (err){
-                        console.error('Error in Saving issue: '+err);
+            Issue.remove({ 'repository': repo._id }, function() {
+                Issue.findOne({ 'html_url': issueData.html_url }, function(err, issue) {
+                    if (err) {
+                        console.error(err);
                     }
-                    cb();
+                    if (!issue) {
+                        issue = new Issue();
+                    }
+
+                    issue.author = issueData.user.login;
+
+                    issue = _.extend(issue, issueData);
+
+                    Repository.findOne({ 'full_name': repoFullName }, function(err, repo){
+                        if (err) {
+                            console.error(err);
+                        }
+                        issue.repository = repo._id;
+                        issue.save(function(err) {
+                            if (err){
+                                console.error('Error in Saving issue: '+err);
+                            }
+                            cb();
+                        });
+                    });
+
                 });
             });
-
         });
     }, function(){
         callback();

@@ -79,6 +79,10 @@ app.controller('IssueController', function($http) {
             });
         });
     };
+
+    this.markNeedsUpdate = function(repoFullName) {
+        $http.post('/repo_needs_update', {repoFullName: repoFullName});
+    }
 });
 
 app.controller('TestController', function($http) {

@@ -18,6 +18,4 @@ module.exports = function(app, allowSigningUp){
     req.logout();
         res.send('signed out');
     });
-
-  return app;
 };

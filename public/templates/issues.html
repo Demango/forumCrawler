@@ -8,7 +8,10 @@
                     </a>
                     <section ng-show="repoData.repository.name == issue.activeTab">
                         <div class="panel-body">
-                            <div ng-repeat="issue in repoData.issues | orderBy:'updated_at':true">
+                            <a ng-click="issue.markNeedsUpdate(repoData.repository.full_name); issue.loadIssues()" class="pull-right" ng-show="!repoData.repository.needs_update && app.config.signedIn">
+                                <span class="glyphicon glyphicon-retweet"></span>
+                            </a>
+                            <div ng-repeat="issue in repoData.issues | orderBy:'updated_at':true" class="pull-left">
                                 <a href="{{ issue.html_url }}" target="_blank" class="truncate">{{ issue.title }}</a>
                                 <p>{{ issue.updated_at|date: 'medium'  }}</p>
                                 <p>{{ issue.author }}</p>

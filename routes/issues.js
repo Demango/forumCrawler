@@ -17,4 +17,10 @@ module.exports = function (app) {
         } else { res.sendStatus(401); }
     });
 
+    app.post('/repo_needs_update', function(req, res) {
+        if (req.user){
+            gitApi.markNeedsUpdate(req.body.repoFullName);
+            res.send('Done');
+        } else { res.sendStatus(401); }
+    });
 };
